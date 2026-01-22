@@ -189,3 +189,5 @@ prompt: ".claude/agents/plan-reviewer.md の手順に従って、Issue #$ARGUMEN
 - `/issue-sync $ARGUMENTS` - 進捗を同期
 - `/tdd` - TDDサイクルを開始
 - `/plan` - 詳細な実装計画を立てる
+- `/check-ci` - CI結果を確認
+- `/pr-merge` - PRマージとブランチ削除
