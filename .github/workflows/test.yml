@@ -2,12 +2,17 @@
 # このワークフローはPR作成時にテストを自動実行し、
 # テスト失敗時はマージをブロックします。
 #
+# Issue #26: pathsフィルター問題の修正
+# - pathsフィルターを削除し、ワークフローは常に実行される
+# - dorny/paths-filter を使用してテスト対象ファイルを検出
+# - テスト対象の変更がない場合は skip-test ジョブで成功を報告
+#
 # ============================================================
 # 言語拡張ガイド (Issue #14)
 # ============================================================
 # 新しい言語を追加した場合は、以下の手順に従ってください：
 #
-# 1. paths フィルターに新言語のパターンを追加（既に含まれている場合はスキップ）
+# 1. check-changes ジョブの filters に新言語のパターンを追加
 #    例: - "**/*.go"
 #        - "**/*.rs"
 #
@@ -23,7 +28,7 @@
 #
 # 現在の対応状況:
 # - Python (pytest): ✅ 対応済み
-# - JavaScript/TypeScript: ⚠️ paths検知のみ（テスト未実装）
+# - JavaScript/TypeScript: ⚠️ 検出のみ（テスト未実装）
 #
 # 詳細は .claude/rules/testing.md の「CI拡張ガイド」を参照
 # ============================================================
@@ -33,19 +38,34 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      # コードファイル
-      - "**/*.py"
-      - "**/*.js"
-      - "**/*.ts"
-      - "**/*.jsx"
-      - "**/*.tsx"
-      # CI設定・依存関係
-      - ".github/workflows/test.yml"
-      - "pyproject.toml"
+    # Issue #26: pathsフィルターを削除
+    # 代わりに dorny/paths-filter で検出し、常にステータスを報告する
 
 jobs:
+  # ファイル変更を検出するジョブ
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      should_test: ${{ steps.filter.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            code:
+              - '**/*.py'
+              - '**/*.js'
+              - '**/*.ts'
+              - '**/*.jsx'
+              - '**/*.tsx'
+              - '.github/workflows/test.yml'
+              - 'pyproject.toml'
+
+  # テスト対象ファイルの変更がある場合に実行
   test:
+    needs: check-changes
+    if: needs.check-changes.outputs.should_test == 'true'
     runs-on: ubuntu-latest
 
     steps:
@@ -63,3 +83,12 @@ jobs:
 
       - name: Run pytest
         run: uv run pytest --tb=short
+
+  # テスト対象ファイルの変更がない場合（スキップとして成功を報告）
+  skip-test:
+    needs: check-changes
+    if: needs.check-changes.outputs.should_test != 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Skip test
+        run: echo "テスト対象の変更なし - スキップ"
