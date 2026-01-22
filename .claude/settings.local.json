@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch",
+      "Skill(url-archiver)",
+      "Bash(python:*)",
+      "WebSearch",
+      "Edit(*)",
+      "Write(*)",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
