@@ -189,6 +189,16 @@ prompt: ".claude/agents/plan-reviewer.md の手順に従って、Issue #$ARGUMEN
 - **PRの作成はユーザーの明示的な指示がある場合のみ実行可能**
 - **進捗報告は `/issue-sync` で必ず行うこと（TDD後、review後）**
 
+## 並列作業について
+
+複数のIssueを同時に作業したい場合は、git worktreeを使用した並列作業がおすすめです。
+
+```
+/worktree-start {issue番号}
+```
+
+詳細は `/worktree-start` コマンドを参照してください。
+
 ## 関連コマンド
 
 - `/issue-sync $ARGUMENTS` - 進捗を同期
@@ -196,3 +206,6 @@ prompt: ".claude/agents/plan-reviewer.md の手順に従って、Issue #$ARGUMEN
 - `/plan` - 詳細な実装計画を立てる
 - `/check-ci` - CI結果を確認
 - `/pr-merge` - PRマージとブランチ削除
+- `/worktree-start` - Worktreeで並列作業開始
+- `/worktree-list` - Worktree一覧表示
+- `/worktree-clean` - Worktree削除
