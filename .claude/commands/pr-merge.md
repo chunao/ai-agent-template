@@ -111,5 +111,6 @@ git branch -d feature/issue-123-xxx
 ## 関連コマンド
 
 - `/check-ci` - CI結果を確認
+- `/pr-create` - PR作成とCI確認
 - `/start-issue` - Issue作業開始
 - `/review` - コードレビュー

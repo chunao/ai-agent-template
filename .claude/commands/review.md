@@ -106,3 +106,11 @@ EOF
 - 修正が必要な箇所を明示
 - 修正後に再度 `/review` を実行するよう案内
 - 必要に応じて `/issue-sync` で進捗を同期することを提案
+
+## 関連コマンド
+
+- `/start-issue` - Issue作業開始
+- `/tdd` - TDDサイクル実行
+- `/pr-create` - PR作成とCI確認
+- `/check-ci` - CI結果を確認
+- `/pr-merge` - PRをマージ
