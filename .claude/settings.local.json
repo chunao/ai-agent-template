@@ -9,8 +9,7 @@
       "Write(*)",
       "Bash(git init:*)",
       "Bash(git add:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nInitial commit: AI Agent Development Template\n\nAIエージェント活用開発のベーステンプレートを構築\n\n- AGENTS.md: プロジェクト設定（80点ルール、TDD、セキュリティ原則）\n- .claude/commands: /tdd, /plan, /review コマンド\n- .claude/rules: セキュリティ、コーディングスタイル、テストルール\n- .agent/skills: skill-creator, url-archiver, knowledge-retriever\n- docs/: AIエージェント活用開発ガイド（3ドキュメント）\n- knowledge/: 技術記事アーカイブ（50+件）\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate settings: Add git commit permission\n\nCo-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit:*)"
     ]
   }
 }
