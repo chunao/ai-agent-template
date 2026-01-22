@@ -1,6 +1,7 @@
 """GitHub Actions ワークフロー設定のテスト
 
 Issue #11: PR作成前のテスト実行を確実にする仕組みを導入する
+Issue #26: pathsフィルターでスキップ時にステータスが報告されない問題を修正
 """
 
 from pathlib import Path
@@ -50,18 +51,51 @@ class TestGitHubActionsWorkflow:
         branches = pr_config.get("branches", [])
         assert "main" in branches, "Workflow should target main branch"
 
-    def test_workflow_has_paths_filter(self, workflow_config: dict):
-        """pathsフィルターが設定されていること"""
-        triggers = self._get_triggers(workflow_config)
-        pr_config = triggers.get("pull_request", {})
-        assert "paths" in pr_config, "Workflow should have paths filter"
+    def test_workflow_has_check_changes_job(self, workflow_config: dict):
+        """check-changesジョブが存在すること（Issue #26: dorny/paths-filter方式）"""
+        jobs = workflow_config.get("jobs", {})
+        assert "check-changes" in jobs, "Workflow should have 'check-changes' job"
 
-    def test_workflow_paths_include_python_files(self, workflow_config: dict):
-        """Pythonファイルがpathsフィルターに含まれていること"""
-        triggers = self._get_triggers(workflow_config)
-        pr_config = triggers.get("pull_request", {})
-        paths = pr_config.get("paths", [])
-        assert any("*.py" in p for p in paths), "Paths should include Python files"
+    def test_check_changes_job_uses_paths_filter(self, workflow_config: dict):
+        """check-changesジョブがdorny/paths-filterを使用すること"""
+        check_changes_job = workflow_config.get("jobs", {}).get("check-changes", {})
+        steps = check_changes_job.get("steps", [])
+        uses_paths_filter = any(
+            "dorny/paths-filter" in step.get("uses", "") for step in steps
+        )
+        assert uses_paths_filter, "check-changes job should use dorny/paths-filter"
+
+    def test_check_changes_job_detects_python_files(self, workflow_config: dict):
+        """check-changesジョブがPythonファイルを検出対象にしていること"""
+        check_changes_job = workflow_config.get("jobs", {}).get("check-changes", {})
+        steps = check_changes_job.get("steps", [])
+        for step in steps:
+            if "dorny/paths-filter" in step.get("uses", ""):
+                filters_config = step.get("with", {}).get("filters", "")
+                assert "*.py" in filters_config, "Paths filter should detect Python files"
+                return
+        pytest.fail("dorny/paths-filter step not found")
+
+    def test_workflow_has_skip_test_job(self, workflow_config: dict):
+        """skip-testジョブが存在すること（Issue #26: テスト不要時用）"""
+        jobs = workflow_config.get("jobs", {})
+        assert "skip-test" in jobs, "Workflow should have 'skip-test' job"
+
+    def test_test_job_depends_on_check_changes(self, workflow_config: dict):
+        """testジョブがcheck-changesに依存すること"""
+        test_job = workflow_config.get("jobs", {}).get("test", {})
+        needs = test_job.get("needs", [])
+        if isinstance(needs, str):
+            needs = [needs]
+        assert "check-changes" in needs, "test job should depend on check-changes"
+
+    def test_skip_test_job_depends_on_check_changes(self, workflow_config: dict):
+        """skip-testジョブがcheck-changesに依存すること"""
+        skip_test_job = workflow_config.get("jobs", {}).get("skip-test", {})
+        needs = skip_test_job.get("needs", [])
+        if isinstance(needs, str):
+            needs = [needs]
+        assert "check-changes" in needs, "skip-test job should depend on check-changes"
 
     def test_workflow_has_jobs(self, workflow_config: dict):
         """ジョブが定義されていること"""
