@@ -9,7 +9,8 @@
       "Write(*)",
       "Bash(git:*)",
       "Bash(gh:*)",
-      "Bash(winget:*)"
+      "Bash(winget:*)",
+      "Bash(ln:*)"
     ]
   }
 }
