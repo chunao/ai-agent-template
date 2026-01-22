@@ -182,3 +182,5 @@ gh run view <run-id> --log-failed
 - `/start-issue` - Issue作業開始
 - `/tdd` - TDDサイクル実行
 - `/review` - コードレビュー
+- `/pr-create` - PR作成とCI確認
+- `/pr-merge` - PRをマージ
