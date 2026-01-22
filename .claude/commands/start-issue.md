@@ -51,13 +51,44 @@ GitHub Issue #$ARGUMENTS の内容を取得し、以下を把握してくださ�
 # mainブランチを最新に更新
 git checkout main
 git pull origin main
+```
 
-# ブランチ命名規則
-# feature/issue-{番号}  - 新機能
-# fix/issue-{番号}      - バグ修正
-# refactor/issue-{番号} - リファクタリング
+#### ブランチ命名規則
 
-git checkout -b feature/issue-$ARGUMENTS
+ブランチ名は `{prefix}/issue-{番号}-{スラッグ}` 形式で作成してください。
+
+| prefix | 用途 |
+|--------|------|
+| `feature/` | 新機能 |
+| `fix/` | バグ修正 |
+| `refactor/` | リファクタリング |
+| `docs/` | ドキュメント |
+
+#### スラッグ生成ルール
+
+Issueタイトルから以下のルールでスラッグを生成してください：
+
+1. **英語タイトルの場合**
+   - 小文字に変換
+   - スペースや特殊文字をハイフン `-` に置換
+   - 連続するハイフンは1つにまとめる
+   - 先頭・末尾のハイフンは削除
+   - 50文字程度に制限（単語の区切りで切る）
+
+2. **日本語タイトルの場合**
+   - 内容を表す英語のスラッグを作成（意訳）
+   - 例: 「ユーザー認証機能を追加」→ `add-user-authentication`
+
+#### 例
+
+| Issueタイトル | ブランチ名 |
+|--------------|-----------|
+| Add user authentication | `feature/issue-5-add-user-authentication` |
+| Fix login validation bug | `fix/issue-10-fix-login-validation-bug` |
+| ブランチ名にIssue内容を含める | `feature/issue-6-improve-branch-naming` |
+
+```bash
+git checkout -b feature/issue-$ARGUMENTS-{スラッグ}
 ```
 
 ### 4. 実装計画の作成
@@ -135,7 +166,7 @@ prompt: ".claude/agents/plan-reviewer.md の手順に従って、Issue #$ARGUMEN
 ## 作業開始レポート
 
 **Issue**: #$ARGUMENTS
-**ブランチ**: feature/issue-$ARGUMENTS
+**ブランチ**: {prefix}/issue-$ARGUMENTS-{スラッグ}
 **開始日時**: {現在日時}
 
 ### 次のステップ
