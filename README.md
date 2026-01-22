@@ -2,6 +2,8 @@
 
 AIエージェント（Claude Code, Codex, Gemini等）を活用した開発のためのプロジェクトテンプレートです。
 
+**リポジトリ**: https://github.com/chunao/ai-agent-template.git
+
 ## クイックスタート
 
 ### 1. テンプレートをコピー
@@ -31,9 +33,11 @@ git init
 claude
 
 # 利用可能なコマンド
-/tdd      # TDDサイクルを開始
-/plan     # 実装計画を立てる
-/review   # コードレビューを実行
+/start-issue 123  # Issue作業を開始
+/tdd              # TDDサイクルを開始
+/issue-sync 123   # 進捗を同期
+/review           # コードレビューを実行
+/plan             # 実装計画を立てる
 ```
 
 ---
@@ -48,15 +52,26 @@ claude
 │
 ├── .claude/                  # Claude Code設定
 │   ├── settings.local.json   # ローカル設定
+│   ├── agents/               # 専門エージェント定義
+│   │   ├── reviewer.md       # レビュー専門
+│   │   ├── tester.md         # テスト専門
+│   │   └── debugger.md       # デバッグ専門
 │   ├── commands/             # クイックコマンド
 │   │   ├── tdd.md            # /tdd
 │   │   ├── plan.md           # /plan
-│   │   └── review.md         # /review
+│   │   ├── review.md         # /review
+│   │   ├── start-issue.md    # /start-issue
+│   │   └── issue-sync.md     # /issue-sync
+│   ├── mcp/                  # MCP設定
+│   │   ├── config.example.json  # 設定テンプレート
+│   │   └── README.md         # MCP設定ガイド
 │   ├── rules/                # 常時適用ルール
 │   │   ├── security.md
 │   │   ├── coding-style.md
 │   │   └── testing.md
-│   └── skills/               # カスタムスキル（空）
+│   └── skills/               # カスタムスキル
+│       ├── progressive-review/  # 段階的レビュー
+│       └── tdd-cycle/        # TDDサイクル
 │
 ├── .agent/                   # 汎用エージェント設定
 │   ├── skills/               # 共有スキル
@@ -80,6 +95,14 @@ claude
 
 ## 含まれるもの
 
+### 専門エージェント (.claude/agents/)
+
+| エージェント | 説明 |
+|-------------|------|
+| reviewer.md | コードレビュー専門（セキュリティ、パフォーマンス、保守性を多角評価） |
+| tester.md | テスト作成・実行専門（TDD、カバレッジ分析） |
+| debugger.md | バグ調査・修正専門（根本原因分析、5 Whys手法） |
+
 ### コマンド (.claude/commands/)
 
 | コマンド | 説明 |
@@ -87,6 +110,8 @@ claude
 | `/tdd` | TDD (Red-Green-Refactor) サイクルを実行 |
 | `/plan` | 実装計画を立てる（3案比較、80点ルール） |
 | `/review` | 段階的コードレビュー（セキュリティ、パフォーマンス、保守性、テスト） |
+| `/start-issue <番号>` | Issue作業を開始（ブランチ作成、計画をIssueコメントに記載） |
+| `/issue-sync <番号>` | 進捗をIssueコメントに同期 |
 
 ### ルール (.claude/rules/)
 
@@ -96,7 +121,23 @@ claude
 | coding-style.md | コーディングスタイルのルール |
 | testing.md | テスト関連のルール |
 
-### スキル (.agent/skills/)
+### MCP設定 (.claude/mcp/)
+
+| ファイル | 説明 |
+|---------|------|
+| config.example.json | MCP設定テンプレート（GitHub, Filesystem, Codex等） |
+| README.md | MCP設定ガイド（セットアップ手順、注意事項） |
+
+### スキル
+
+#### .claude/skills/ (Claude Code専用)
+
+| スキル | 説明 |
+|--------|------|
+| progressive-review | 段階的コードレビュー（4観点を順次チェック） |
+| tdd-cycle | TDDサイクル（Red-Green-Refactor強制実行） |
+
+#### .agent/skills/ (汎用・共有)
 
 | スキル | 説明 |
 |--------|------|

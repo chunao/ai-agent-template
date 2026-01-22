@@ -110,6 +110,11 @@ temp/
 *.backup
 
 # ===================
+# Claude Code / MCP
+# ===================
+.claude/mcp/config.json
+
+# ===================
 # Project specific
 # ===================
 # Add project-specific ignores below
