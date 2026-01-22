@@ -9,8 +9,10 @@
 
 - **プロジェクト名**: AI Agent Development Template
 - **リポジトリ**: https://github.com/chunao/ai-agent-template.git
+- **テンプレート**: GitHub Template機能が有効（"Use this template"で新規リポジトリ作成可能）
 - **概要**: AIエージェント（Claude Code, Codex, Gemini等）を活用した開発のためのプロジェクトテンプレート。docs/の資料に基づくAIエージェント開発フローを完成させ、他プロジェクトで再利用可能なテンプレートを構築する。
-- **技術スタック**: Markdown, YAML, Python (スクリプト), Claude Code
+- **技術スタック**: Python, uv (パッケージ管理), pytest, Claude Code
+- **環境構築**: `uv sync` で依存関係インストール、`uv run pytest` でテスト実行
 
 ---
 
