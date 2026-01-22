@@ -1,0 +1,39 @@
+# Issue #11: PR作成前のテスト実行を確実にする
+# このワークフローはPR作成時にテストを自動実行し、
+# テスト失敗時はマージをブロックします。
+name: Test
+
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      # コードファイル
+      - "**/*.py"
+      - "**/*.js"
+      - "**/*.ts"
+      - "**/*.jsx"
+      - "**/*.tsx"
+      # CI設定・依存関係
+      - ".github/workflows/test.yml"
+      - "pyproject.toml"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Install dependencies
+        run: uv sync --dev
+
+      - name: Run pytest
+        run: uv run pytest --tb=short
