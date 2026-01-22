@@ -6,27 +6,39 @@ AIエージェント（Claude Code, Codex, Gemini等）を活用した開発の�
 
 ## クイックスタート
 
-### 1. テンプレートをコピー
+### 1. テンプレートからリポジトリを作成
+
+このリポジトリは **GitHub Template** として公開されています。
 
 ```bash
-# 新規プロジェクトディレクトリを作成
-mkdir my-new-project
+# GitHub CLIを使用（推奨）
+gh repo create my-new-project --template chunao/ai-agent-template --private
 cd my-new-project
 
-# テンプレートの内容をコピー（.gitを除く）
-cp -r /path/to/this-template/* .
-cp -r /path/to/this-template/.* . 2>/dev/null || true
-
-# Gitを初期化
-git init
+# または、GitHubのWebUIから "Use this template" ボタンをクリック
 ```
 
-### 2. プロジェクト設定を編集
+### 2. 開発環境のセットアップ
+
+```bash
+# uvをインストール（未インストールの場合）
+# Windows: winget install astral-sh.uv
+# macOS/Linux: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 依存関係をインストール
+uv sync
+
+# テストを実行して動作確認
+uv run pytest
+```
+
+### 3. プロジェクト設定を編集
 
 1. **AGENTS.md** を開いてプロジェクト情報を記入
 2. **README.md** をプロジェクト固有の内容に書き換え
+3. **pyproject.toml** のプロジェクト名・説明を更新
 
-### 3. 開発開始
+### 4. 開発開始
 
 ```bash
 # Claude Codeを起動
