@@ -10,7 +10,33 @@
 
 ## 実行手順
 
-### 1. Issueの取得と理解
+### 1. リモート状態の確認（重要）
+
+**作業開始前に必ずリモートの状態を確認してください。**
+
+```bash
+# リモートの最新状態を取得
+git fetch origin
+
+# 現在のブランチとリモートの状態を確認
+git branch -a
+
+# 既存のPR状態を確認
+gh pr list --state all | grep "issue-$ARGUMENTS"
+```
+
+#### チェックポイント
+
+| 状態 | 対応 |
+|------|------|
+| 該当ブランチが存在しない | → 新規作成OK |
+| ブランチが存在 & PRなし | → 既存ブランチを確認し、必要なら削除して新規作成 |
+| ブランチが存在 & PRがOpen | → 既存PRで作業を継続するか確認 |
+| ブランチが存在 & PRがMerged | → ⚠️ **新しいIssue/ブランチで作業すべき** |
+
+> **警告**: PRがマージ済みのブランチで作業を続けると、変更がmainに反映されません。必ず新しいブランチを作成してください。
+
+### 2. Issueの取得と理解
 
 GitHub Issue #$ARGUMENTS の内容を取得し、以下を把握してください：
 
@@ -19,9 +45,13 @@ GitHub Issue #$ARGUMENTS の内容を取得し、以下を把握してくださ�
 - 受け入れ基準（あれば）
 - 関連するIssueやPR
 
-### 2. ブランチの作成
+### 3. ブランチの作成
 
 ```bash
+# mainブランチを最新に更新
+git checkout main
+git pull origin main
+
 # ブランチ命名規則
 # feature/issue-{番号}  - 新機能
 # fix/issue-{番号}      - バグ修正
@@ -30,7 +60,7 @@ GitHub Issue #$ARGUMENTS の内容を取得し、以下を把握してくださ�
 git checkout -b feature/issue-$ARGUMENTS
 ```
 
-### 3. 実装計画の作成
+### 4. 実装計画の作成
 
 以下の形式で実装計画を作成し、**Issueコメントに投稿**してください：
 
@@ -58,7 +88,7 @@ git checkout -b feature/issue-$ARGUMENTS
 
 > **重要**: ローカルに設計MDファイルを残さない。Issueコメントに一元化する。
 
-### 4. 作業開始の確認
+### 5. 作業開始の確認
 
 ```markdown
 ## 作業開始レポート
