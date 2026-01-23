@@ -28,7 +28,13 @@
       "Skill(review)",
       "Skill(check-ci)",
       "Skill(codex-delegate)",
-      "Bash(if not exist \"D:\\\\projects\\\\P010-worktrees\" mkdir \"D:\\\\projects\\\\P010-worktrees\")"
+      "Bash(if:*)",
+      "Bash(gemini:*)",
+      "Bash(dir:*)",
+      "Bash(pushd:*)",
+      "Bash(popd)",
+      "Bash(cmd:*)",
+      "Skill(progressive-review)"
     ]
   }
 }
