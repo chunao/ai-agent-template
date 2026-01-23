@@ -7,10 +7,26 @@
       "WebSearch",
       "Edit(*)",
       "Write(*)",
+      "Update(*)",
       "Bash(git:*)",
       "Bash(gh:*)",
       "Bash(winget:*)",
-      "Bash(ln:*)"
+      "Bash(ln:*)",
+      "Bash(mkdir:*)",
+      "Bash(pip install:*)",
+      "Bash(rm:*)",
+      "Bash(touch:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv run pytest:*)",
+      "Skill(knowledge-retrieval)",
+      "Bash(claude:*)",
+      "Skill(review)",
+      "Bash(find:*)",
+      "Skill(check-ci)",
+      "Bash(BRANCH=$(git branch --show-current) && ISSUE_NUM=$(echo \"$BRANCH\" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+') && echo \"Issue番号: $ISSUE_NUM\")",
+      "Bash(xargs ls:*)",
+      "Bash(test:*)",
+      "Bash(ls:*)"
     ]
   }
 }
