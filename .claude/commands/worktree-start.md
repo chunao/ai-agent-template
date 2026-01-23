@@ -125,7 +125,7 @@ cp .claude/settings.local.json ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}
 2. `/start-issue $ARGUMENTS` で実装計画を作成（計画立案フェーズ）
 3. `/tdd` でテスト駆動開発を開始（実装フェーズ）
 
-> **注意**: `/start-issue` は計画立案の責務を持ちます。環境準備は本コマンドで完了しているため、`/start-issue` ではWorktree作成をスキップしてステップ5（実装計画の作成）から開始されます。
+> **注意**: `/start-issue` は計画立案の責務を持ちます。環境準備は本コマンドで完了しているため、`/start-issue` ではWorktree作成をスキップしてステップ5（要件確認フェーズ）から開始されます。
 
 ### 現在のworktree一覧
 `/worktree-list` で確認できます
