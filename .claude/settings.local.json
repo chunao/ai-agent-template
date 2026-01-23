@@ -27,7 +27,8 @@
       "Skill(knowledge-retrieval)",
       "Skill(review)",
       "Skill(check-ci)",
-      "Skill(codex-delegate)"
+      "Skill(codex-delegate)",
+      "Bash(if not exist \"D:\\\\projects\\\\P010-worktrees\" mkdir \"D:\\\\projects\\\\P010-worktrees\")"
     ]
   }
 }
