@@ -2,6 +2,22 @@
 
 段階的にコードレビューを実行します。
 
+## レビュー実行方法
+
+### 方法1: Codex委任（推奨 - レートリミット対策）
+
+codex-delegateスキルを使用してprogressive-reviewを実行：
+
+```
+codex-delegateスキルを使用して、progressive-reviewを実行してください。
+対象: 現在のブランチの変更（git diff main...HEAD）
+Issue: #{ブランチから抽出したIssue番号}
+```
+
+### 方法2: Claude Code（フォールバック）
+
+Codex CLI利用不可時（未インストール / OPENAI_API_KEY未設定 / 実行エラー）は、以下の「レビュー観点」に従って従来通り4観点の段階的レビューを実行してください。
+
 ## レビュー観点
 
 ### 1. セキュリティチェック
