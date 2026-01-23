@@ -152,15 +152,23 @@ git checkout -b feature/issue-$ARGUMENTS-{スラッグ}
 | テスト計画 | 受け入れ基準に対応するテストがあるか | |
 | アーキテクチャ | 既存パターンに従っているか | |
 
-#### Step 2: plan-reviewer エージェントによるレビュー
+#### Step 2: 計画レビューの実行
 
 セルフチェック後、客観的な視点でのレビューを受けます：
 
+##### 方法1: Codex委任（推奨 - レートリミット対策）
+
+codex-delegateスキルを使用してplan-reviewを実行：
+
 ```
-実装計画をレビューしてください。plan-reviewerエージェントを使用してください。
+codex-delegateスキルを使用して、plan-reviewを実行してください。
+対象: Issue #$ARGUMENTS の実装計画
+Issue: #$ARGUMENTS
 ```
 
-または Task ツールで呼び出し：
+##### 方法2: Claude Code サブエージェント（フォールバック）
+
+Codex CLI利用不可時：
 
 ```
 subagent_type: "general-purpose"
