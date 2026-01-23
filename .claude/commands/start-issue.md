@@ -45,22 +45,43 @@ GitHub Issue #$ARGUMENTS の内容を取得し、以下を把握してくださ�
 - 受け入れ基準（あれば）
 - 関連するIssueやPR
 
-### 3. Worktree必須ガイダンス
+### 3. Worktree環境の準備
 
 > **必須**: すべてのIssue作業において、例外なくWorktreeを使用してください。
 > Worktreeにより作業の独立性が保証され、並列作業時のコンフリクトを防ぎます。
 
-#### Worktree環境で作業する場合
+#### Worktree作成済みの場合
 
-既に `/worktree-start $ARGUMENTS` でWorktreeが作成済みの場合は、ステップ4（ブランチの作成）をスキップしてステップ5（実装計画の作成）に進んでください。
+既に `/worktree-start $ARGUMENTS` でWorktreeが作成済みの場合は、Worktreeディレクトリに移動してステップ5（実装計画の作成）に進んでください。
 
-Worktreeがまだ作成されていない場合は、別ターミナルで以下を実行してください:
-
-```
-/worktree-start $ARGUMENTS
+```bash
+cd D:\projects\P010-worktrees\issue-$ARGUMENTS-{スラッグ}
 ```
 
-作成後、Worktreeディレクトリで新しいClaude Codeセッションを開始し、再度 `/start-issue $ARGUMENTS` を実行してください。
+#### Worktree未作成の場合（同一セッション内で作成）
+
+Worktreeが未作成の場合は、同一セッション内で以下の環境準備を実行し、そのまま計画立案を続行してください。
+
+```bash
+# 1. リモート最新状態を取得
+git fetch origin
+
+# 2. worktree用ディレクトリを作成（存在しない場合）
+mkdir -p ../P010-worktrees
+
+# 3. worktreeを作成（ブランチも同時に作成される）
+git worktree add -b {prefix}/issue-$ARGUMENTS-{スラッグ} ../P010-worktrees/issue-$ARGUMENTS-{スラッグ} origin/main
+
+# 4. 環境ファイルをコピー（存在しない場合はスキップ、エラーにしない）
+cp .env ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}/.env 2>/dev/null || true
+cp .env.local ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}/.env.local 2>/dev/null || true
+cp .claude/settings.local.json ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}/.claude/settings.local.json 2>/dev/null || true
+
+# 5. ワークディレクトリを変更
+cd ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}
+```
+
+> **注意**: `git worktree add -b` でブランチは作成済みのため、ステップ4（ブランチの作成）はスキップし、ステップ5（実装計画の作成）に直接進んでください。
 
 ### 4. ブランチの作成
 

@@ -118,17 +118,12 @@ cp .claude/settings.local.json ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}
 
 ### 次のステップ（標準フロー）
 
-1. 新しいターミナルを開く
-2. worktreeディレクトリに移動:
+1. worktreeディレクトリに移動:
    ```bash
    cd D:\projects\P010-worktrees\issue-$ARGUMENTS-{スラッグ}
    ```
-3. Claude Codeを起動:
-   ```bash
-   claude
-   ```
-4. `/start-issue $ARGUMENTS` で実装計画を作成（計画立案フェーズ）
-5. `/tdd` でテスト駆動開発を開始（実装フェーズ）
+2. `/start-issue $ARGUMENTS` で実装計画を作成（計画立案フェーズ）
+3. `/tdd` でテスト駆動開発を開始（実装フェーズ）
 
 > **注意**: `/start-issue` は計画立案の責務を持ちます。環境準備は本コマンドで完了しているため、`/start-issue` ではWorktree作成をスキップしてステップ5（実装計画の作成）から開始されます。
 
