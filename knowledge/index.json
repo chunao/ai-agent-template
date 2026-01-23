@@ -300,37 +300,6 @@
     ]
   },
   {
-    "id": "20260121_555780",
-    "title": "Antigravityでもスキルが使えるようになった | Claude Codeと共有で管理がラクに",
-    "url": "https://note.com/jaga_farm/n/n25abe5c7ce41",
-    "added_at": "2026-01-21T00:12:09.840296",
-    "published_at": "2026-01-21",
-    "tags": [
-      "Antigravity",
-      "Claude Code",
-      "スキル",
-      "シンボリックリンク"
-    ],
-    "use_cases": [
-      "Claude CodeとAntigravity両方をPro Planで契約している場合",
-      "リミットを分散させたいが、スキル管理を一元化したい場合",
-      "Claude Codeで既に作成したスキルを、Antigravityでも活用したい場合"
-    ],
-    "anti_cases": [
-      "どちらか一方のAIエージェントのみを使用している場合",
-      "スキル管理を完全に独立させたい場合"
-    ],
-    "decision_triggers": [
-      "Claude CodeまたはAntigravityのリミットに頻繁に到達する場合",
-      "同じスキルを両方のAIエージェントで使いたい場合",
-      "スキル管理の手間を削減したい場合"
-    ],
-    "code_snippets": [
-      "シンボリックリンク作成コマンド",
-      "Antigravity側からスキルを読み込む"
-    ]
-  },
-  {
     "id": "20260121_2bee66",
     "title": "CursorClaudeCodeCodeCLIの使い分けメモ：向き不向きと認知疲労",
     "url": "https://zenn.dev/zatsucat/articles/2bee6640de16d1",
@@ -619,42 +588,6 @@
     ]
   },
   {
-    "id": "20260121_63d325",
-    "title": "Claude CodeとCodexの連携をMCPからSkillに変えたら体験が劇的に改善した",
-    "url": "https://zenn.dev/owayo/articles/63d325934ba0de",
-    "added_at": "2026-01-21T11:20:16.511990",
-    "published_at": "2025-01-21",
-    "tags": [
-      "Claude Code",
-      "Codex",
-      "MCP",
-      "Skill",
-      "AI連携",
-      "開発体験"
-    ],
-    "use_cases": [
-      "複雑な問題の調査や長時間実行が予想されるタスク",
-      "コードレビュー、設計相談、バグ調査",
-      "Claude Codeと異なる視点からのアプローチが欲しい場合",
-      "リアルタイムで進捗を確認しながら作業を進めたい場合"
-    ],
-    "anti_cases": [
-      "短時間で完結する単純なタスク",
-      "Claude Code単独で十分に解決可能な明確なタスク",
-      "Codex CLIがインストールされていない環境"
-    ],
-    "decision_triggers": [
-      "MCPでの実行中に進捗が見えず不安を感じた時",
-      "長時間実行タスクでタイムアウトの心配がある時",
-      "デバッグや原因究明が困難な問題に直面した時",
-      "複数のAIツールを組み合わせて効率化したい時"
-    ],
-    "code_snippets": [
-      "Skill YAMLフロントマター設定",
-      "Skillドキュメント本体（実行コマンド、パラメータ、使用例）"
-    ]
-  },
-  {
     "id": "20260121_f8f90c",
     "title": "NotebookLMの型破りな5つの活用法でゲームチェンジ",
     "url": "https://note.com/genaird/n/nf8f90c66829a",
@@ -834,42 +767,6 @@
       "ファイル名のフォントカスタマイズ CSS",
       "タスク整合性チェック Python スクリプト",
       "拡張子一斉変換スクリプト"
-    ]
-  },
-  {
-    "id": "20260121_ba0de6",
-    "title": "Claude CodeとCodexの連携をMCPからSkillに変えたら体験が劇的に改善した",
-    "url": "https://zenn.dev/owayo/articles/63d325934ba0de",
-    "added_at": "2026-01-21T11:25:25.432938",
-    "published_at": "2025-01-21",
-    "tags": [
-      "Claude Code",
-      "Codex",
-      "MCP",
-      "Skill",
-      "AI連携",
-      "開発体験"
-    ],
-    "use_cases": [
-      "複雑な問題の調査や長時間実行が予想されるタスク",
-      "コードレビュー、設計相談、バグ調査",
-      "Claude Codeと異なる視点からのアプローチが欲しい場合",
-      "リアルタイムで進捗を確認しながら作業を進めたい場合"
-    ],
-    "anti_cases": [
-      "短時間で完結する単純なタスク",
-      "Claude Code単独で十分に解決可能な明確なタスク",
-      "Codex CLIがインストールされていない環境"
-    ],
-    "decision_triggers": [
-      "MCPでの実行中に進捗が見えず不安を感じた時",
-      "長時間実行タスクでタイムアウトの心配がある時",
-      "デバッグや原因究明が困難な問題に直面した時",
-      "複数のAIツールを組み合わせて効率化したい時"
-    ],
-    "code_snippets": [
-      "Skill YAMLフロントマター設定",
-      "Skillドキュメント本体（実行コマンド、パラメータ、使用例）"
     ]
   },
   {
@@ -1689,37 +1586,6 @@
     ]
   },
   {
-    "id": "20260122_781ecc",
-    "title": "Claude CodeとCodexの連携をMCPからSkillに変えたら体験が劇的に改善した",
-    "url": "https://zenn.dev/owayo/articles/63d325934ba0de",
-    "added_at": "2026-01-22T08:08:09.810353",
-    "published_at": "2026-01-14",
-    "tags": [
-      "Claude Code",
-      "Codex",
-      "MCP",
-      "Skill",
-      "CLI",
-      "開発体験"
-    ],
-    "use_cases": [
-      "長時間実行タスク（コードレビュー、バグ調査など）",
-      "進捗状況を把握しながら作業したい場合",
-      "デバッグ情報が必要な複雑なタスク"
-    ],
-    "anti_cases": [
-      "数秒で完了する単純なタスク",
-      "MCPの統一的なインターフェースが必要な場合"
-    ],
-    "decision_triggers": [
-      "MCPでCodexを使っていて進捗が見えずストレスを感じたとき",
-      "長時間タスクでタイムアウトしたかどうか判断できないとき"
-    ],
-    "code_snippets": [
-      "Codex実行コマンド"
-    ]
-  },
-  {
     "id": "20260122_91a074",
     "title": "Claude Code × Codex 連携入門",
     "url": "https://zenn.dev/yujmatsu/articles/20260120_claude_code_codex",
@@ -2186,6 +2052,40 @@
       "AIエージェントとの協働でミスコミュニケーションが発生した時",
       "これは仕様か設計か？の判断に迷う場面が増えた時",
       "Kiroなど仕様駆動のツールを導入する時"
+    ]
+  },
+  {
+    "id": "20260123_781ecc",
+    "title": "Claude CodeとCodexの連携をMCPからSkillに変えたら体験が劇的に改善した",
+    "url": "https://zenn.dev/owayo/articles/63d325934ba0de",
+    "added_at": "2026-01-23T11:18:12.054525",
+    "published_at": "2026-01-14",
+    "tags": [
+      "Claude Code",
+      "Codex",
+      "MCP",
+      "Skill",
+      "AI Agent"
+    ],
+    "use_cases": [
+      "複雑なコードレビューや時間のかかるタスクをサブエージェントに委任したい場合",
+      "AIエージェントの実行状況をリアルタイムで監視・制御したい場合",
+      "デバッグのために詳細な出力ログが必要な場合"
+    ],
+    "anti_cases": [
+      "数秒で完了する短時間タスク",
+      "コマンドライン実行をサポートしないツール"
+    ],
+    "decision_triggers": [
+      "MCPツールが数十分以上無応答になる問題に直面した場合",
+      "サブエージェントの実行状況が不明で不安を感じる場合",
+      "デバッグのためにエラー出力やログが必要になった場合"
+    ],
+    "code_snippets": [
+      "Skill定義のYAML Frontmatter",
+      "Codex実行コマンド",
+      "コードレビュー例",
+      "バグ調査例"
     ]
   }
 ]

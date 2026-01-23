@@ -54,6 +54,7 @@ python .agent/skills/url-archiver/scripts/check_duplicate.py --url "{url}"
 2. **ユーザーへの確認は不要です。自動的に更新処理を進めます。**
    - ログ出力: 「重複が見つかりました。既存のアーカイブを削除して更新します: {ID}」
 3. **以下のコマンドで既存アーカイブを削除してからステップ1へ進みます:**
+   - **このコマンドは、アーカイブファイル (`knowledge/archive/{ID}.md`) と `index.json` 内の該当エントリの両方を削除します**
      ```powershell
      python .agent/skills/url-archiver/scripts/remove_archive.py --id "{取得したID}"
      ```
