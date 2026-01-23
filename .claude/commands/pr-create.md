@@ -38,40 +38,67 @@ git status
 git push -u origin $(git branch --show-current)
 ```
 
-### 3. PR作成
+### 3. Issue情報の取得
+
+PR作成に必要なIssue情報を取得します。Issue番号は以下の優先順位で特定してください：
+
+1. 会話コンテキストから（`/start-issue XX` で開始した場合）
+2. ブランチ名からフォールバック抽出:
 
 ```bash
-# PRを作成（日本語）
-gh pr create --fill
+BRANCH=$(git branch --show-current)
+ISSUE_NUM=$(echo "$BRANCH" | grep -oE 'issue-[0-9]+' | grep -oE '[0-9]+')
 ```
 
-#### PR作成のフォーマット
+Issue番号が特定できたら、Issueタイトルを取得します：
 
-PRタイトルとボディは以下の形式で自動生成：
+```bash
+ISSUE_TITLE=$(gh issue view $ISSUE_NUM --json title -q '.title')
+```
 
-```markdown
+### 4. PR作成（日本語）
+
+PRタイトルとボディを日本語で作成します。
+
+#### タイトル生成ルール
+
+- Issueタイトルをそのまま使用する
+- 例: `PRを日本語で作成するようにする`
+
+#### ボディ生成ルール
+
+以下のテンプレートに従い、Issue内容と `git diff main...HEAD` の差分を参考に、各セクションを日本語で記述してください：
+
+```bash
+gh pr create --title "$ISSUE_TITLE" --body "$(cat <<'EOF'
 ## 概要
-{Issueの目的と実装内容}
+- {Issueの目的と実装内容を箇条書きで記載}
 
 ## 変更内容
-- {変更点1}
-- {変更点2}
+- {変更したファイルと変更内容を記載}
 
 ## テスト
-- {テスト内容}
+- {テスト内容・検証結果を記載}
 
-## 関連Issue
 Closes #{Issue番号}
+EOF
+)"
 ```
 
-### 4. PR番号の取得
+#### 注意事項
+
+- タイトル・ボディは必ず日本語で記述すること
+- `Closes #XX` はGitHubのIssue自動クローズ機能を利用するため、必ず含めること
+- ボディのセクション（概要・変更内容・テスト）は省略せず、実際の変更に基づいて記述すること
+
+### 5. PR番号の取得
 
 ```bash
 # 作成したPRの番号を取得
 gh pr view --json number -q '.number'
 ```
 
-### 5. CI結果の確認
+### 6. CI結果の確認
 
 PR作成後、自動的にCI結果を確認します。
 
@@ -93,7 +120,7 @@ gh run list --branch $(git branch --show-current) --limit 5 --json databaseId,st
 | `queued` | - | 待機中 |
 | `completed` | `skipped` | スキップ（paths filterなど） |
 
-### 6. 結果に応じた処理
+### 7. 結果に応じた処理
 
 #### CI成功の場合
 
@@ -210,7 +237,7 @@ PR #XX を作成しました。
 - または手動でCIを確認してください
 ```
 
-### 7. 出力例
+### 8. 出力例
 
 #### 成功時の完全な出力
 
