@@ -111,6 +111,16 @@ EOF
 - 修正後に再度 `/review` を実行するよう案内
 - 必要に応じて `/issue-sync` で進捗を同期することを提案
 
+## Relationship with Progressive Review
+
+本コマンド (`/review`) は Progressive Review スキル (`.claude/skills/progressive-review/SKILL.md`) の実行ワークフローです。
+
+| 項目 | 説明 |
+|------|------|
+| **本コマンドの責務** | レビューのエントリポイント。スコア判定後のIssue投稿フローを定義 |
+| **Progressive Review の責務** | 4観点を段階的に評価する実行ロジック。評価手順の詳細を定義 |
+| **reviewer.md との違い** | reviewer.md はサブエージェントとして呼び出される軽量版。本コマンドはPR前最終レビュー |
+
 ## 関連コマンド
 
 - `/start-issue` - Issue作業開始
