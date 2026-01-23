@@ -1,6 +1,8 @@
 # /worktree-start - Worktreeで並列作業開始
 
-git worktreeを使って新しい作業ディレクトリを作成し、指定したIssueの作業を開始します。
+git worktreeを使って新しい作業ディレクトリを作成し、指定したIssueの作業環境を準備します。
+
+> **責務**: このコマンドは「環境準備」を担当します。Worktree作成と環境ファイルの同期を行い、作業環境を分離します。実装計画の作成・レビューは `/start-issue` の責務です。
 
 ## 使い方
 
@@ -108,13 +110,13 @@ cp .claude/settings.local.json ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}
 ### 6. 作業開始の案内
 
 ```markdown
-## Worktree作成完了
+## Worktree作成完了（環境準備完了）
 
 **Issue**: #$ARGUMENTS
 **Worktreeパス**: D:\projects\P010-worktrees\issue-$ARGUMENTS-{スラッグ}
 **ブランチ**: {prefix}/issue-$ARGUMENTS-{スラッグ}
 
-### 次のステップ
+### 次のステップ（標準フロー）
 
 1. 新しいターミナルを開く
 2. worktreeディレクトリに移動:
@@ -125,8 +127,10 @@ cp .claude/settings.local.json ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}
    ```bash
    claude
    ```
-4. `/start-issue $ARGUMENTS` で実装計画を作成
-5. `/tdd` でテスト駆動開発を開始
+4. `/start-issue $ARGUMENTS` で実装計画を作成（計画立案フェーズ）
+5. `/tdd` でテスト駆動開発を開始（実装フェーズ）
+
+> **注意**: `/start-issue` は計画立案の責務を持ちます。環境準備は本コマンドで完了しているため、`/start-issue` ではWorktree作成をスキップしてステップ5（実装計画の作成）から開始されます。
 
 ### 現在のworktree一覧
 `/worktree-list` で確認できます
