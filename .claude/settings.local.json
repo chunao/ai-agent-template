@@ -34,7 +34,8 @@
       "Bash(pushd:*)",
       "Bash(popd)",
       "Bash(cmd:*)",
-      "Skill(progressive-review)"
+      "Skill(progressive-review)",
+      "Bash(curl:*)"
     ]
   }
 }
