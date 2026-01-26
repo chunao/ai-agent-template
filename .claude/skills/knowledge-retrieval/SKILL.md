@@ -11,9 +11,10 @@ description: ユーザーが「方法」についてのガイダンスやベス�
 
 ### 前提条件
 
-- `GEMINI_API_KEY` 環境変数が設定されていること（`.env` ファイルまたは環境変数）
-- Python 3.11以上がインストールされていること
-- `google-generativeai` パッケージがインストールされていること（`uv sync` で自動インストール）
+- `gemini` CLIツールがインストールされていること
+  - インストール: `npm install -g @google/generative-ai-cli` または Homebrew等
+  - 認証: `gemini auth login` で認証を完了しておくこと
+- Gemini CLIの認証を使用するため、`GEMINI_API_KEY` 環境変数は不要
 
 ### 基本方針
 
@@ -24,29 +25,59 @@ description: ユーザーが「方法」についてのガイダンスやベス�
 
 ## ワークフロー
 
-### ステップ 1: Gemini APIによるナレッジ検索（コンテキスト節約）
+### ステップ 1: Gemini CLIによるナレッジ検索（コンテキスト節約）
 
-**重要**: メインエージェントは `index.json` を読み込みません。代わりに、Gemini APIにナレッジ検索タスクを委譲します。これにより、メインエージェントのコンテキストウィンドウを節約できます。
+**重要**: メインエージェントは `index.json` を読み込みません。代わりに、Gemini CLIにナレッジ検索タスクを委譲します。これにより、メインエージェントのコンテキストウィンドウを節約できます。
 
-以下のコマンドを実行して、Gemini APIに検索を依頼します：
+以下のコマンドを実行して、Gemini CLIに検索を依頼します：
 
-```powershell
-uv run python .claude/skills/knowledge-retrieval/scripts/search_with_gemini.py --request "[ここにユーザーの質問やタスク内容を記述]" --max 5
+```bash
+gemini -p "$(cat <<'EOF'
+以下のナレッジインデックスを分析し、ユーザーリクエストに関連する記事を最大5件選択してください。
+
+【インデックスデータ】
+$(cat knowledge/index.json)
+
+【分析観点】
+- tags: 現在のトピックとの一致度
+- use_cases: 現在の状況との適合性
+- decision_triggers: 類似したトリガーの存在
+- anti_cases: 避けるべき条件の確認
+
+【出力フォーマット】
+以下の形式で、選択した記事のIDのみを出力してください：
+
+SELECTED_ARTICLE_IDS:
+- 20260120_a1cce2
+- 20260121_63d325
+
+【ユーザーリクエスト】
+[ここにユーザーの質問やタスク内容を記述]
+EOF
+)"
 ```
 
-**注意事項**:
-- `[ここにユーザーの質問やタスク内容を記述]` の部分を、実際のユーザーリクエストに置き換えてください
-- 引用符内に二重引用符が含まれる場合は、適切にエスケープしてください
-- `GEMINI_API_KEY` 環境変数が設定されていない場合はエラーメッセージが表示されます
+**プロンプト構築手順**:
+1. `[ここにユーザーの質問やタスク内容を記述]` の部分を、実際のユーザーリクエストに置き換える
+2. `knowledge/index.json` のパスがプロジェクトルートからの相対パスであることを確認
+3. ヒアドキュメント（`<<'EOF'`）を使用することで、引用符のエスケープが不要
+
+**エラーハンドリング**:
+```bash
+if ! gemini -p "..." 2>/dev/null; then
+  echo "エラー: Gemini CLI呼び出しに失敗しました" >&2
+  exit 1
+fi
+```
 
 **エラー時のフォールバック**:
-- `GEMINI_API_KEY` が未設定の場合: ユーザーにAPIキーの設定を依頼してください
+- `gemini` コマンドが見つからない場合: `gemini` CLIのインストールと認証を確認してください
 - API呼び出しが失敗した場合: ネットワーク接続を確認してリトライしてください
-- 120秒以上応答がない場合: ユーザーに状況を報告してください
+- 120秒以上応答がない場合: タイムアウト処理を検討してください（実装時にBash `timeout` コマンドを使用）
 
 ### ステップ 2: IDリストの抽出
 
-Claude CLIの出力から、`SELECTED_ARTICLE_IDS:` セクション以降の行を抽出し、各行から記事ID（`YYYYMMDD_XXXXXX` 形式）を取得します。
+Gemini CLIの出力から、`SELECTED_ARTICLE_IDS:` セクション以降の行を抽出し、各行から記事ID（`YYYYMMDD_XXXXXX` 形式）を取得します。
 
 **期待される出力**:
 ```
@@ -102,8 +133,30 @@ view_file(AbsolutePath="d:/projects/P010/knowledge/archive/20260121_555780.md")
 **ユーザーリクエスト**: "Claude Codeで複数のタスクを並列実行する方法を教えて"
 
 **実行コマンド**:
-```powershell
-uv run python .claude/skills/knowledge-retrieval/scripts/search_with_gemini.py --request "Claude Codeで複数のタスクを並列実行する方法を教えて" --max 5
+```bash
+gemini -p "$(cat <<'EOF'
+以下のナレッジインデックスを分析し、ユーザーリクエストに関連する記事を最大5件選択してください。
+
+【インデックスデータ】
+$(cat knowledge/index.json)
+
+【分析観点】
+- tags: 現在のトピックとの一致度
+- use_cases: 現在の状況との適合性
+- decision_triggers: 類似したトリガーの存在
+- anti_cases: 避けるべき条件の確認
+
+【出力フォーマット】
+以下の形式で、選択した記事のIDのみを出力してください：
+
+SELECTED_ARTICLE_IDS:
+- 20260120_a1cce2
+- 20260121_63d325
+
+【ユーザーリクエスト】
+Claude Codeで複数のタスクを並列実行する方法を教えて
+EOF
+)"
 ```
 
 **出力例**:
@@ -125,8 +178,30 @@ view_file(AbsolutePath="d:/projects/P010/knowledge/archive/20260121_1153aa.md")
 **ユーザーリクエスト**: "MCPサーバーの実装方法を知りたい"
 
 **実行コマンド**:
-```powershell
-uv run python .claude/skills/knowledge-retrieval/scripts/search_with_gemini.py --request "MCPサーバーの実装方法を知りたい" --max 5
+```bash
+gemini -p "$(cat <<'EOF'
+以下のナレッジインデックスを分析し、ユーザーリクエストに関連する記事を最大5件選択してください。
+
+【インデックスデータ】
+$(cat knowledge/index.json)
+
+【分析観点】
+- tags: 現在のトピックとの一致度
+- use_cases: 現在の状況との適合性
+- decision_triggers: 類似したトリガーの存在
+- anti_cases: 避けるべき条件の確認
+
+【出力フォーマット】
+以下の形式で、選択した記事のIDのみを出力してください：
+
+SELECTED_ARTICLE_IDS:
+- 20260121_3808a9
+- 20260121_61630a
+
+【ユーザーリクエスト】
+MCPサーバーの実装方法を知りたい
+EOF
+)"
 ```
 
 **出力例**:
