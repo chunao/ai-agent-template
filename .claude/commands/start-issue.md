@@ -45,91 +45,52 @@ GitHub Issue #$ARGUMENTS の内容を取得し、以下を把握してくださ�
 - 受け入れ基準（あれば）
 - 関連するIssueやPR
 
-### 3. Worktree環境の準備
+### 3. Worktree前提チェック
 
-> **必須**: すべてのIssue作業において、例外なくWorktreeを使用してください。
-> Worktreeにより作業の独立性が保証され、並列作業時のコンフリクトを防ぎます。
+**前提条件**: このコマンドはWorktree環境で実行する必要があります。
 
-#### Worktree作成済みの場合
+> **必須**: ワークフローの原則「1 Issue = 1 Worktree」に従い、すべてのIssue作業は専用のWorktree環境で行います。
 
-既に `/worktree-start $ARGUMENTS` でWorktreeが作成済みの場合は、Worktreeディレクトリに移動してステップ5（要件確認フェーズ）に進んでください。
+#### チェック方法
 
+現在のディレクトリがWorktree内かどうかを確認してください：
+
+**Bash版**:
 ```bash
-cd D:\projects\P010-worktrees\issue-$ARGUMENTS-{スラッグ}
+# Worktree環境かどうかを判定
+current_dir=$(pwd)
+if ! git worktree list | grep -q "$current_dir"; then
+  echo "エラー: このコマンドはWorktree環境で実行する必要があります"
+  echo ""
+  echo "次の手順:"
+  echo "1. /worktree-start $ARGUMENTS を実行してWorktree環境を作成"
+  echo "2. 作成されたWorktree内で /start-issue $ARGUMENTS を再実行"
+  exit 1
+fi
 ```
 
-#### Worktree未作成の場合（同一セッション内で作成）
-
-Worktreeが未作成の場合は、同一セッション内で以下の環境準備を実行し、そのまま計画立案を続行してください。
-
-```bash
-# 1. リモート最新状態を取得
-git fetch origin
-
-# 2. worktree用ディレクトリを作成（存在しない場合）
-mkdir -p ../P010-worktrees
-
-# 3. worktreeを作成（ブランチも同時に作成される）
-git worktree add -b {prefix}/issue-$ARGUMENTS-{スラッグ} ../P010-worktrees/issue-$ARGUMENTS-{スラッグ} origin/main
-
-# 4. 環境ファイルをコピー（存在しない場合はスキップ、エラーにしない）
-cp .env ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}/.env 2>/dev/null || true
-cp .env.local ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}/.env.local 2>/dev/null || true
-cp .claude/settings.local.json ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}/.claude/settings.local.json 2>/dev/null || true
-
-# 5. ワークディレクトリを変更
-cd ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}
+**PowerShell版**:
+```powershell
+# Worktree環境かどうかを判定
+$currentDir = (Get-Location).Path
+$worktreeList = git worktree list
+if (-not ($worktreeList -match [regex]::Escape($currentDir))) {
+  Write-Host "エラー: このコマンドはWorktree環境で実行する必要があります" -ForegroundColor Red
+  Write-Host ""
+  Write-Host "次の手順:"
+  Write-Host "1. /worktree-start $ARGUMENTS を実行してWorktree環境を作成"
+  Write-Host "2. 作成されたWorktree内で /start-issue $ARGUMENTS を再実行"
+  exit 1
+}
 ```
 
-> **注意**: `git worktree add -b` でブランチは作成済みのため、ステップ4（ブランチの作成）はスキップし、ステップ5（要件確認フェーズ）に直接進んでください。
+#### Worktree未作成の場合
 
-### 4. ブランチの作成
+Worktreeが未作成の場合は、先に `/worktree-start $ARGUMENTS` を実行してWorktree環境を準備してください。
 
-```bash
-# mainブランチを最新に更新
-git checkout main
-git pull origin main
-```
+Worktree環境の作成と環境ファイルの同期は `/worktree-start` の責務です。詳細は `/worktree-start` コマンドを参照してください。
 
-#### ブランチ命名規則
-
-ブランチ名は `{prefix}/issue-{番号}-{スラッグ}` 形式で作成してください。
-
-| prefix | 用途 |
-|--------|------|
-| `feature/` | 新機能 |
-| `fix/` | バグ修正 |
-| `refactor/` | リファクタリング |
-| `docs/` | ドキュメント |
-
-#### スラッグ生成ルール
-
-Issueタイトルから以下のルールでスラッグを生成してください：
-
-1. **英語タイトルの場合**
-   - 小文字に変換
-   - スペースや特殊文字をハイフン `-` に置換
-   - 連続するハイフンは1つにまとめる
-   - 先頭・末尾のハイフンは削除
-   - 50文字程度に制限（単語の区切りで切る）
-
-2. **日本語タイトルの場合**
-   - 内容を表す英語のスラッグを作成（意訳）
-   - 例: 「ユーザー認証機能を追加」→ `add-user-authentication`
-
-#### 例
-
-| Issueタイトル | ブランチ名 |
-|--------------|-----------|
-| Add user authentication | `feature/issue-5-add-user-authentication` |
-| Fix login validation bug | `fix/issue-10-fix-login-validation-bug` |
-| ブランチ名にIssue内容を含める | `feature/issue-6-improve-branch-naming` |
-
-```bash
-git checkout -b feature/issue-$ARGUMENTS-{スラッグ}
-```
-
-### 5. 要件確認フェーズ
+### 4. 要件確認フェーズ
 
 Issueの内容を分析し、未確定・曖昧な部分がないか確認してください。
 
@@ -148,7 +109,7 @@ Issueの内容を分析し、未確定・曖昧な部分がないか確認して
 - 確認漏れよりも過剰確認を許容する（ユーザー方針）
 - 確認結果は後続の計画作成に反映する
 
-### 6. 調査・ブレインストーミングフェーズ
+### 5. 調査・ブレインストーミングフェーズ
 
 計画作成前に、以下の調査を実施してください。
 
@@ -207,7 +168,7 @@ gemini -p "{質問プロンプト}"
 - AIの回答は参考情報であり、最終判断はメインエージェントが行う
 - CLI がスキップされた場合は、その旨を計画作成時に記録する
 
-### 7. ナレッジ参照フェーズ
+### 6. ナレッジ参照フェーズ
 
 `knowledge-retrieval` スキルを使用して、過去にアーカイブされた技術記事から関連知見を検索してください。
 
@@ -226,9 +187,9 @@ knowledge-retrieval スキルの手順に従い、以下を実行します：
 - 有用と判断したもののみ計画に組み込む
 - 関連記事がない場合はスキップ可能
 
-> ステップ5〜7の結果を踏まえて、以下のステップ8で実装計画を作成してください。
+> ステップ4〜6の結果を踏まえて、以下のステップ7で実装計画を作成してください。
 
-### 8. 実装計画の作成
+### 7. 実装計画の作成
 
 以下の形式で実装計画を作成し、**Issueコメントに投稿**してください：
 
@@ -256,7 +217,7 @@ knowledge-retrieval スキルの手順に従い、以下を実行します：
 
 > **重要**: ローカルに設計MDファイルを残さない。Issueコメントに一元化する。
 
-### 9. 計画レビュー（2段階）
+### 8. 計画レビュー（2段階）
 
 実装計画を投稿したら、**実装を開始する前に**必ずレビューを行ってください。
 
@@ -348,13 +309,13 @@ EOF
 ```
 計画作成 → plan-reviewer採点（1回目）
   ↓
-[80点以上] → Step 3（Issueに投稿） → ステップ7（作業開始）
+[80点以上] → Step 3（Issueに投稿） → ステップ9（作業開始）
   ↓
 [80点未満] → 指摘事項に基づき修正 → plan-reviewer再採点（2回目）【必須】
   ↓
-[80点以上] → Step 3（Issueに投稿） → ステップ7（作業開始）
+[80点以上] → Step 3（Issueに投稿） → ステップ9（作業開始）
   ↓
-[80点未満 & 60点以上 & 指摘軽微] → AI判断で続行可能（理由をIssue記録）→ ステップ7
+[80点未満 & 60点以上 & 指摘軽微] → AI判断で続行可能（理由をIssue記録）→ ステップ9
   ↓
 [80点未満 & (60点未満 or 重大指摘)] → 再度修正 → 再採点...（ループ）
 ```
@@ -394,7 +355,7 @@ EOF
 
 投稿完了後、「計画レビュー結果をIssue #$ARGUMENTS に投稿しました。」と報告してください。
 
-### 10. 作業開始の確認
+### 9. 作業開始の確認
 
 > **前提条件**: 以下のいずれかを満たしていること。満たさない場合、作業開始レポートは作成できません。
 > - 直近のレビュースコアが80点以上である
