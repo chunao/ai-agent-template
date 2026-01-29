@@ -96,8 +96,20 @@ echo "Issue番号: $ISSUE_NUM"
 以下の形式でIssueにコメントを投稿します：
 
 ```bash
-gh issue comment $ISSUE_NUM --body "$(cat <<'EOF'
-## レビュー完了報告 - {日時}
+# 環境に応じた日時取得（クロスプラットフォーム対応）
+REVIEW_DATE=$(date "+%Y-%m-%d %H:%M:%S" 2>/dev/null || powershell -Command "Get-Date -Format 'yyyy-MM-dd HH:mm:ss'")
+
+# 使用モデル情報（review.mdの推奨モデル: Claude Sonnet 4.5）
+EXECUTOR="Claude Code直接実行"
+MODEL="Claude Sonnet 4.5"
+
+gh issue comment $ISSUE_NUM --body "$(cat <<EOF
+## レビュー完了報告 - ${REVIEW_DATE}
+
+### 実行情報
+- **実行者**: ${EXECUTOR}
+- **使用モデル**: ${MODEL}
+- **実行日時**: ${REVIEW_DATE}
 
 ### レビュー結果
 | 観点 | スコア |
