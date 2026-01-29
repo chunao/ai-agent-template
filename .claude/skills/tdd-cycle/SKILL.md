@@ -92,8 +92,20 @@ Phase 0 で「テスト不要ファイルのみ」と判定された場合、TDD
 確認完了後、Issueコメントに結果を投稿します：
 
 ```bash
-gh issue comment {issue番号} --body "$(cat <<'EOF'
-## 動作確認結果 - {日時}
+# 環境に応じた日時取得（クロスプラットフォーム対応）
+CONFIRM_DATE=$(date "+%Y-%m-%d %H:%M:%S" 2>/dev/null || powershell -Command "Get-Date -Format 'yyyy-MM-dd HH:mm:ss'")
+
+# 使用モデル情報（TDD REVIEWの推奨モデル: Haiku）
+EXECUTOR="Claude Code直接実行"
+MODEL="Haiku"
+
+gh issue comment {issue番号} --body "$(cat <<EOF
+## 動作確認結果 - ${CONFIRM_DATE}
+
+### 実行情報
+- **実行者**: ${EXECUTOR}
+- **使用モデル**: ${MODEL}
+- **実行日時**: ${CONFIRM_DATE}
 
 ### 変更ファイル
 - {ファイル1}
