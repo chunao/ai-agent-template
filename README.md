@@ -74,6 +74,10 @@ claude
 │   │   ├── review.md         # /review
 │   │   ├── start-issue.md    # /start-issue
 │   │   └── issue-sync.md     # /issue-sync
+│   ├── templates/            # テンプレートファイル
+│   │   ├── implementation-plan.md      # 実装計画
+│   │   ├── plan-review-result.md       # 計画レビュー結果
+│   │   └── work-start-report.md        # 作業開始レポート
 │   ├── mcp/                  # MCP設定
 │   │   ├── config.example.json  # 設定テンプレート
 │   │   └── README.md         # MCP設定ガイド
