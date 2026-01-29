@@ -262,11 +262,13 @@ echo "{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task\":\"external-ai-h
 
 #### 実行方法
 
-knowledge-retrieval スキルの手順に従い、以下を実行します：
+knowledge-retrieval スキルの手順に従い、Gemini CLI経由でナレッジ検索を実行します：
 
-1. Claude CLI（`claude --print`）にナレッジ検索を委譲
+1. Gemini CLI（`gemini -p`）にナレッジ検索を委譲
 2. 返された記事IDに基づき、関連記事を読み込み
 3. 有用な知見があれば、計画作成に参考情報として活用
+
+詳細な実行手順（stdin + -p方式、プロンプトテンプレート等）は `.claude/skills/knowledge-retrieval/SKILL.md` を参照してください。
 
 #### 注意事項
 
