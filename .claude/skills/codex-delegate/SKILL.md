@@ -89,13 +89,167 @@ gh issue view {issue番号} --comments
 
 ### Step 4: Codex CLI実行
 
+#### 実行コマンド形式
+
+**重要**: `codex` コマンドではなく、`codex exec` サブコマンドを使用すること。
+
+##### 方法1: プロンプトをファイルから読み取る（推奨）
+
+```bash
+# プロンプトをファイルに保存
+cat > /tmp/codex-prompt.txt <<'PROMPT_EOF'
+{組み立てたプロンプト}
+PROMPT_EOF
+
+# codex execで実行（stdinから読み取り）
+cat /tmp/codex-prompt.txt | codex exec --full-auto --sandbox read-only --cd "{project_directory}" -
+```
+
+##### 方法2: プロンプトを引数として直接渡す
+
 ```bash
 codex exec --full-auto --sandbox read-only --cd "{project_directory}" "{組み立てたプロンプト}"
+```
+
+#### オプションの説明
+
+| オプション | 説明 |
+|-----------|------|
+| `exec` | 非インタラクティブモードで実行（**必須**） |
+| `--full-auto` | 自動実行モード（承認なし） |
+| `--sandbox read-only` | 読み取り専用サンドボックス |
+| `--cd <DIR>` | 作業ディレクトリを指定 |
+| `-` | stdinからプロンプトを読み取る（方法1の場合） |
+
+#### エラーハンドリング
+
+Codex CLI実行時のエラー判定：
+
+```bash
+if ! cat /tmp/codex-prompt.txt | codex exec --full-auto --sandbox read-only --cd "{project_directory}" - 2>&1; then
+  echo "Codex CLI実行に失敗しました。Claude Codeでフォールバック実行します。"
+  exit 1
+fi
 ```
 
 ### Step 5: 結果返却
 
 Codexの出力をそのまま返却します（既存フォーマットに準拠した出力を指示済み）。
+
+---
+
+## Complete Example（完全な実行例）
+
+### plan-review の実行例
+
+以下は、Issue #123 の計画レビューを Codex CLI に委任する完全な実行例です。
+
+```bash
+# Step 1: Codex CLI の存在確認
+if ! where codex 2>nul; then
+  echo "Codex CLI が見つかりません。フォールバックします。"
+  exit 1
+fi
+
+# Step 2: Issue内容と計画を取得
+issue_content=$(gh issue view 123 --comments)
+
+# Step 3: プロンプト組み立て（ファイルに保存）
+cat > /tmp/plan-review-prompt.txt <<'PROMPT_EOF'
+あなたは実装計画のレビュー専門家です。以下の実装計画を5観点から評価してください。
+
+## 評価基準（5観点、各20点）
+
+### 受け入れ基準との整合性（20点）
+- Issueに記載された受け入れ基準をすべてカバーしているか
+- 要件の解釈に誤りがないか
+- スコープが適切か（過剰でも不足でもない）
+
+### タスク粒度（20点）
+- 各タスクは明確で実行可能か
+- タスクのサイズは適切か（大きすぎ/小さすぎない）
+- タスク間の依存関係は明確か
+
+### 影響範囲の網羅性（20点）
+- 変更が影響するファイル/モジュールをすべて把握しているか
+- 副作用の考慮はあるか
+- 関連する既存機能への影響は検討されているか
+
+### テスト計画の妥当性（20点）
+- 受け入れ基準に対応するテストが計画されているか
+- エッジケースは考慮されているか
+- テスト可能な形で計画されているか
+
+### アーキテクチャ整合性（20点）
+- 既存のコーディングパターンに従っているか
+- プロジェクトの規約に準拠しているか
+- 技術選定は適切か
+
+## コンテキスト（Issue内容）
+
+${issue_content}
+
+## 出力フォーマット（厳守）
+
+## 計画レビュー結果
+
+**総合スコア**: XX/100点
+
+| 観点 | スコア | 状態 |
+|------|--------|------|
+| 受け入れ基準整合性 | XX/20 | ✅/⚠️/❌ |
+| タスク粒度 | XX/20 | ✅/⚠️/❌ |
+| 影響範囲網羅性 | XX/20 | ✅/⚠️/❌ |
+| テスト計画妥当性 | XX/20 | ✅/⚠️/❌ |
+| アーキテクチャ整合性 | XX/20 | ✅/⚠️/❌ |
+
+### 問題点・懸念事項
+1. [Critical] {問題}
+2. [Warning] {懸念}
+3. [Info] {提案}
+
+### 改善提案
+- {具体的な修正案}
+
+### 判定
+- **80点以上**: ✅ 実装開始OK
+- **60-79点**: ⚠️ 修正後に再レビュー推奨
+- **60点未満**: ❌ 計画の見直しが必要
+PROMPT_EOF
+
+# Step 4: Codex CLI 実行
+cat /tmp/plan-review-prompt.txt | codex exec --full-auto --sandbox read-only --cd "D:\projects\P010" -
+
+# エラーコードを確認
+if [ $? -ne 0 ]; then
+  echo "Codex CLI実行に失敗しました。Claude Codeでフォールバック実行します。"
+  exit 1
+fi
+```
+
+### tdd-review の実行例
+
+```bash
+# テストファイルと実装ファイルの内容を取得
+test_content=$(cat tests/test_example.py)
+impl_content=$(cat src/example.py)
+
+# プロンプト組み立て（テンプレートは省略）
+cat > /tmp/tdd-review-prompt.txt <<'PROMPT_EOF'
+あなたはテスト品質レビューの専門家です。...（テンプレート本文）
+
+## 対象テストファイル
+
+${test_content}
+
+## 対応する実装ファイル
+
+${impl_content}
+PROMPT_EOF
+
+# Codex CLI 実行
+cat /tmp/tdd-review-prompt.txt | codex exec --full-auto --sandbox read-only --cd "D:\projects\P010" -
+```
 
 ---
 
