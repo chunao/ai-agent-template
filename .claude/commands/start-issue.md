@@ -204,13 +204,38 @@ timeout 120 codex exec --full-auto --sandbox read-only --cd "{project_directory}
 
 > **実行条件**: Codex CLI が利用不可の場合のみ実行してください。
 
+**stdin + -p方式の採用**: 大きなプロンプト（Issue内容を含む）を送信するため、stdin経由でプロンプトを流し込みます。
+
 ```bash
-timeout 120 gemini -p "{組み立てたプロンプト}" 2>&1 || echo "GEMINI_TIMEOUT_OR_ERROR"
+# タイマー開始（ログ記録用）
+START_TIME=$(date +%s)
+
+# プロンプトを動的に生成
+PROMPT="{組み立てたプロンプト}"
+
+# stdin + -p方式でGemini CLIを実行
+echo "$PROMPT" | timeout 120 gemini -m gemini-2.5-pro 2>&1 || echo "GEMINI_TIMEOUT_OR_ERROR"
+
+# タイマー終了とログ記録
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+
+echo "{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task\":\"external-ai-hearing\",\"model\":\"gemini-2.5-pro\",\"duration_sec\":${DURATION}}" >> .claude/logs/gemini_usage.jsonl
 ```
 
 **設定**:
 - タイムアウト: 120秒（Codexと同じ値で統一）
 - 認証: `gemini auth login` で事前認証が必要
+- モデル指定: `-m gemini-2.5-pro`（**必須**）
+
+**セキュリティ対策**:
+- プロンプトを変数 `PROMPT` に代入し、`echo` 経由でstdinに流し込む
+- シェルインジェクションを防止
+
+**ログ記録**:
+- 実行前に `START_TIME` を記録
+- 実行後に `END_TIME` を記録し、`DURATION` を計算
+- `.claude/logs/gemini_usage.jsonl` にJSONL形式でログを追記
 
 **フォールバック条件**:
 - Gemini CLIが見つからない
