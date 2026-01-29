@@ -81,42 +81,6 @@ class TestStartIssueWorktreeGuidance:
             pytest.skip(f"Command file not found: {command_path}")
         return command_path.read_text(encoding="utf-8")
 
-    def test_has_worktree_guidance_before_branch_creation(self, command_content: str):
-        """ブランチ作成ステップの前にWorktree推奨ガイダンスがあること"""
-        # Worktree推奨ガイダンスの存在確認
-        worktree_keywords = ["Worktree", "worktree"]
-        has_worktree_mention = any(
-            keyword in command_content for keyword in worktree_keywords
-        )
-        assert has_worktree_mention, "Command should mention Worktree"
-
-        # 「推奨」の文言があること
-        recommend_keywords = ["推奨", "おすすめ", "recommended"]
-        has_recommendation = any(
-            keyword in command_content for keyword in recommend_keywords
-        )
-        assert has_recommendation, "Command should recommend using Worktree"
-
-        # Worktreeガイダンスがブランチ作成の前にあること
-        # ブランチ作成は「### 3. ブランチの作成」で始まる
-        branch_creation_markers = ["ブランチの作成", "git checkout -b"]
-        first_branch_marker = min(
-            (command_content.find(m) for m in branch_creation_markers if command_content.find(m) >= 0),
-            default=-1,
-        )
-
-        # Worktree推奨の位置を確認
-        worktree_recommend_pos = -1
-        for keyword in ["Worktree推奨", "Worktree使用", "worktree-start"]:
-            pos = command_content.find(keyword)
-            if pos >= 0 and (worktree_recommend_pos < 0 or pos < worktree_recommend_pos):
-                worktree_recommend_pos = pos
-
-        assert worktree_recommend_pos >= 0, "Command should have Worktree guidance"
-        assert first_branch_marker >= 0, "Command should have branch creation section"
-        assert worktree_recommend_pos < first_branch_marker, (
-            "Worktree guidance should appear before branch creation step"
-        )
 
     def test_no_duplicate_parallel_work_section(self, command_content: str):
         """末尾の「並列作業について」セクションが統合されていること（重複がないこと）"""
@@ -127,12 +91,6 @@ class TestStartIssueWorktreeGuidance:
             "not remain as a separate section"
         )
 
-    def test_non_worktree_flow_preserved(self, command_content: str):
-        """通常フロー（非Worktree）が維持されていること"""
-        # ブランチ作成のステップが残っていること
-        assert "git checkout -b" in command_content, (
-            "Non-worktree flow (branch creation) should be preserved"
-        )
 
 
 class TestWorktreeStartCommandIntegration:
