@@ -109,23 +109,36 @@ cp .claude/settings.local.json ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}
 
 ### 6. 作業開始の案内
 
-```markdown
-## Worktree作成完了（環境準備完了）
+以下のフォーマットでユーザーに案内してください：
 
-**Issue**: #$ARGUMENTS
+```markdown
+## Worktree作成完了
+
 **Worktreeパス**: D:\projects\P010-worktrees\issue-$ARGUMENTS-{スラッグ}
 **ブランチ**: {prefix}/issue-$ARGUMENTS-{スラッグ}
 
-### 次のステップ（標準フロー）
+### 次のステップ
 
-1. worktreeディレクトリに移動:
-   ```bash
-   cd D:\projects\P010-worktrees\issue-$ARGUMENTS-{スラッグ}
+1. **このセッションを終了してください**（Ctrl+D または exit）
+
+2. **以下のコマンドをコピーして実行してください**:
+
+   **PowerShell**:
+   ```powershell
+   cd D:\projects\P010-worktrees\issue-$ARGUMENTS-{スラッグ}; claude code
    ```
-2. `/start-issue $ARGUMENTS` で実装計画を作成（計画立案フェーズ）
-3. `/tdd` でテスト駆動開発を開始（実装フェーズ）
 
-> **注意**: `/start-issue` は計画立案の責務を持ちます。環境準備は本コマンドで完了しているため、`/start-issue` ではWorktree作成をスキップしてステップ5（要件確認フェーズ）から開始されます。
+   **Bash**:
+   ```bash
+   cd D:\projects\P010-worktrees\issue-$ARGUMENTS-{スラッグ} && claude code
+   ```
+
+3. 新しいセッションで `/start-issue $ARGUMENTS` を実行
+
+---
+
+**重要**: 新しいセッションをWorktree内で開始することで、ディレクトリ認識の確実性が向上します。
+セッション起動時に自動的に正しいディレクトリにいるため、誤操作のリスクが大幅に低減されます。
 
 ### 現在のworktree一覧
 `/worktree-list` で確認できます
