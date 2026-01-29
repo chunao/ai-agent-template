@@ -105,6 +105,9 @@ cp .env.local ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}/.env.local 2>/de
 
 # settings.local.json をコピー（存在する場合）
 cp .claude/settings.local.json ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}/.claude/settings.local.json 2>/dev/null || true
+
+# knowledge/ ディレクトリをコピー（存在する場合）
+cp -r knowledge ../P010-worktrees/issue-$ARGUMENTS-{スラッグ}/knowledge 2>/dev/null || true
 ```
 
 ### 6. 作業開始の案内

@@ -113,6 +113,10 @@ temp/
 # Claude Code / MCP
 # ===================
 .claude/mcp/config.json
+.claude/settings.local.json
+
+# Knowledge base (local only)
+knowledge/
 
 # ===================
 # Project specific

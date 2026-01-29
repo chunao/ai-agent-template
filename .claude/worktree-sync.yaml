@@ -8,3 +8,4 @@ sync_files:
   - .env
   - .env.local
   - .claude/settings.local.json
+  - knowledge/
