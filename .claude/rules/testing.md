@@ -56,17 +56,51 @@ def test_example():
 
 ## テスト要否の判断基準
 
-PR作成前にテストを実行すべきかどうかの判断基準です。
+### 新規テスト作成の要否
 
-| ファイルタイプ | テスト実行 | 備考 |
-|--------------|----------|------|
-| `*.py`, `*.js`, `*.ts`, `*.jsx`, `*.tsx` | 必須 | コードロジック変更 |
-| `.github/workflows/*.yml` | 必須 | CI/CD設定は動作確認必要 |
-| `pyproject.toml` | 必須 | 依存関係変更の影響確認 |
+新しいコードやワークフロー定義を追加した際に、新規テストを作成すべきかどうかの判断基準です。
+
+| ファイルタイプ | 新規テスト作成 | 備考 |
+|--------------|---------------|------|
+| `*.py`, `*.js`, `*.ts`, `*.jsx`, `*.tsx` | 必須 | コードロジック変更には対応するテストが必要 |
+| `.github/workflows/*.yml` | 推奨 | CI/CD設定の動作を検証するテスト |
+| `pyproject.toml` | 不要 | 依存関係のみの変更 |
 | `*.md`, `*.json`, `*.yaml` | 不要 | ドキュメント/設定ファイル |
-| `.claude/**/*.md` | 不要 | ワークフロー定義 |
+| `.claude/**/*.md` | 推奨 | ワークフロー定義の整合性を検証するテスト（下記「変更影響マップ」参照） |
+
+### 既存テスト実行の要否（PR作成前）
+
+PR作成前に既存テストを実行すべきかどうかの判断基準です。
+
+| 状況 | 既存テスト実行 | 備考 |
+|------|--------------|------|
+| **すべての変更** | **必須** | 影響範囲が予見できないため、全テスト実行を推奨 |
+| **例外1**: ドキュメントのみ変更（typo修正等） | 任意 | ただし、ワークフロー定義（`.claude/**/*.md`）は除く |
+| **例外2**: コメントのみ変更 | 任意 | コードの動作に影響しない変更 |
+
+> **重要**: 上記「例外」に該当する場合でも、**関連テストの存在を確認**し、影響がないことを確認してください。不明な場合は全テスト実行を推奨します。
 
 > **注意**: GitHub Actions が `paths` フィルターで自動判定しますが、ローカルでも事前にテストを実行することを推奨します。
+
+### 変更影響マップ
+
+ワークフロー定義ファイル（`.claude/**/*.md`）と関連テストファイルの対応関係です。これらのファイルを変更した場合、対応するテストファイルを実行してください。
+
+| 変更ファイル | 影響を受けるテスト | 理由 |
+|------------|------------------|------|
+| `.claude/commands/start-issue.md` | `tests/test_worktree_workflow.py` | Worktreeフローの整合性を検証 |
+| `.claude/commands/worktree-start.md` | `tests/test_worktree_workflow.py` | Worktreeフローの整合性を検証 |
+| `.claude/commands/pr-merge.md` | `tests/test_pr_merge_command.py` | PRマージコマンドの動作を検証 |
+| `.claude/commands/check-ci.md` | `tests/test_check_ci_command.py` | CI確認コマンドの動作を検証 |
+| `.claude/skills/ci-analyzer/*.md` | `tests/test_ci_analyzer_skill.py` | CI分析スキルの動作を検証 |
+| `.claude/agents/ci-fixer.md` | `tests/test_ci_fixer_agent.py` | CI修正エージェントの動作を検証 |
+| `.claude/agents/plan-reviewer.md` | `tests/test_review_assignment.py` | レビューアサインメントの整合性を検証 |
+| `.claude/agents/reviewer.md` | `tests/test_review_assignment.py` | レビューアサインメントの整合性を検証 |
+| `.claude/skills/tdd-cycle/*.md` | `tests/test_review_assignment.py`, `tests/test_issue_number_context_extraction.py` | TDDサイクルの動作を検証 |
+| `.claude/skills/progressive-review/*.md` | `tests/test_review_assignment.py` | プログレッシブレビューの動作を検証 |
+| `.claude/rules/review-assignment-guide.md` | `tests/test_review_assignment.py` | レビューアサインメントの整合性を検証 |
+
+> **使用方法**: 上記のファイルを変更した場合、対応するテストファイルを実行してください。影響範囲が不明な場合は、全テスト（`pytest`）を実行してください。
 
 ## 動作確認（テスト不要ファイル向け）
 

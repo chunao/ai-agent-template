@@ -61,6 +61,12 @@ jobs:
               - '**/*.tsx'
               - '.github/workflows/test.yml'
               - 'pyproject.toml'
+              # Issue #93: ワークフロー定義ファイル変更時もテスト実行
+              # testing.mdの「変更影響マップ」に基づき、関連テストを自動実行
+              - '.claude/commands/*.md'
+              - '.claude/skills/**/*.md'
+              - '.claude/agents/*.md'
+              - '.claude/rules/*.md'
 
   # テスト対象ファイルの変更がある場合に実行
   test:
