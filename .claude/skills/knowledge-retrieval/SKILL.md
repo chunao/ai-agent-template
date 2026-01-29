@@ -29,14 +29,22 @@ description: ユーザーが「方法」についてのガイダンスやベス�
 
 **重要**: メインエージェントは `index.json` を読み込みません。代わりに、Gemini CLIにナレッジ検索タスクを委譲します。これにより、メインエージェントのコンテキストウィンドウを節約できます。
 
+**stdin + -p方式の採用**: 大きなファイル（125KB以上）を送信するため、stdin経由でindex.jsonを流し込み、`-p`オプションで短い指示を追加します。
+
 以下のコマンドを実行して、Gemini CLIに検索を依頼します：
 
 ```bash
-gemini -p "$(cat <<'EOF'
-以下のナレッジインデックスを分析し、ユーザーリクエストに関連する記事を最大5件選択してください。
+# タイマー開始（ログ記録用）
+START_TIME=$(date +%s)
 
-【インデックスデータ】
-$(cat knowledge/index.json)
+# ユーザーリクエストを変数に代入（シェルインジェクション対策）
+USER_REQUEST="[ここにユーザーの質問やタスク内容を記述]"
+
+# .claude/logsディレクトリが存在しない場合は作成
+mkdir -p .claude/logs
+
+# stdin + -p方式でGemini CLIを実行
+cat knowledge/index.json | timeout 120 gemini -m gemini-2.5-pro -p "以下のナレッジインデックスを分析し、「${USER_REQUEST}」に関連する記事を最大5件選択してください。
 
 【分析観点】
 - tags: 現在のトピックとの一致度
@@ -49,31 +57,35 @@ $(cat knowledge/index.json)
 
 SELECTED_ARTICLE_IDS:
 - 20260120_a1cce2
-- 20260121_63d325
+- 20260121_63d325" 2>&1
+EXIT_CODE=$?
 
-【ユーザーリクエスト】
-[ここにユーザーの質問やタスク内容を記述]
-EOF
-)"
+# タイマー終了とログ記録
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+
+echo "{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task\":\"knowledge-retrieval\",\"model\":\"gemini-2.5-pro\",\"duration_sec\":${DURATION},\"exit_code\":${EXIT_CODE}}" >> .claude/logs/gemini_usage.jsonl
 ```
 
-**プロンプト構築手順**:
-1. `[ここにユーザーの質問やタスク内容を記述]` の部分を、実際のユーザーリクエストに置き換える
-2. `knowledge/index.json` のパスがプロジェクトルートからの相対パスであることを確認
-3. ヒアドキュメント（`<<'EOF'`）を使用することで、引用符のエスケープが不要
+**セキュリティ対策**:
+- ユーザー入力を変数 `USER_REQUEST` に代入し、直接シェルコマンドに埋め込まない
+- 二重引用符で囲まれたプロンプト内で `${USER_REQUEST}` を展開（シェルの変数展開機能を利用）
+- `timeout 120` でタイムアウトを設定（120秒）
 
-**エラーハンドリング**:
-```bash
-if ! gemini -p "..." 2>/dev/null; then
-  echo "エラー: Gemini CLI呼び出しに失敗しました" >&2
-  exit 1
-fi
-```
+**ログ記録**:
+- 実行前に `START_TIME` を記録
+- 実行後に `END_TIME` を記録し、`DURATION` を計算
+- `.claude/logs/gemini_usage.jsonl` にJSONL形式でログを追記
+
+**注意事項**:
+- `[ここにユーザーの質問やタスク内容を記述]` の部分を、実際のユーザーリクエストに置き換えてください
+- `gemini` コマンドが見つからない場合: `gemini` CLIのインストールと認証を確認してください
+- モデル指定（`-m gemini-2.5-pro`）は**必須**です
 
 **エラー時のフォールバック**:
-- `gemini` コマンドが見つからない場合: `gemini` CLIのインストールと認証を確認してください
+- `gemini` コマンドが見つからない場合: Gemini CLIのインストールと認証を確認してください
 - API呼び出しが失敗した場合: ネットワーク接続を確認してリトライしてください
-- 120秒以上応答がない場合: タイムアウト処理を検討してください（実装時にBash `timeout` コマンドを使用）
+- 120秒以上応答がない場合（タイムアウト）: ユーザーに状況を報告し、スキップしてください
 
 ### ステップ 2: IDリストの抽出
 
@@ -121,7 +133,7 @@ view_file(AbsolutePath="d:/projects/P010/knowledge/archive/20260121_555780.md")
 
 -   **あなたの知識を第一に**: このスキルは補助的なツールです。あなた自身の知識、ベストプラクティス、判断力を最優先してください。
 -   **コンテキスト分離の利点**: このワークフローでは、メインエージェントは `index.json`（約88KB）を一切読み込みません。Gemini APIが別コンテキストで処理するため、メインエージェントのコンテキストウィンドウを100%節約できます。
--   **AI検索の信頼性**: Gemini 2.0 Flashは1Mトークンのコンテキストウィンドウを持ち、index.json全体を総合的に分析できます。タグの表記ゆれ（例: "MCP" と "Model Context Protocol"）も適切に認識します。
+-   **AI検索の信頼性**: Gemini 2.5 Proは1Mトークンのコンテキストウィンドウを持ち、index.json全体を総合的に分析できます。タグの表記ゆれ（例: "MCP" と "Model Context Protocol"）も適切に認識します。
 -   **選択的な参照**: Gemini APIが選択した記事IDのみを読み込みます。通常3〜5件の記事に絞り込まれるため、必要最小限のコンテキスト消費で済みます。これらの記事はあくまで「こういう手段もあるんだな」という参考情報です。
 -   **鮮度の確認**: `published_at` の日付を確認してください。古い記事には時代遅れの情報が含まれている可能性があります。あなた自身の判断を使用してください。
 -   **一つの参考例**: アーカイブされたナレッジは、物事を行うための*一つの*方法（例）を表しており、必ずしも*唯一の*または*絶対的に最良の*方法ではありません。あなた自身の知識と比較し、有用と判断したもののみを採用してください。
@@ -134,11 +146,12 @@ view_file(AbsolutePath="d:/projects/P010/knowledge/archive/20260121_555780.md")
 
 **実行コマンド**:
 ```bash
-gemini -p "$(cat <<'EOF'
-以下のナレッジインデックスを分析し、ユーザーリクエストに関連する記事を最大5件選択してください。
+START_TIME=$(date +%s)
+USER_REQUEST="Claude Codeで複数のタスクを並列実行する方法を教えて"
 
-【インデックスデータ】
-$(cat knowledge/index.json)
+mkdir -p .claude/logs
+
+cat knowledge/index.json | timeout 120 gemini -m gemini-2.5-pro -p "以下のナレッジインデックスを分析し、「${USER_REQUEST}」に関連する記事を最大5件選択してください。
 
 【分析観点】
 - tags: 現在のトピックとの一致度
@@ -151,19 +164,20 @@ $(cat knowledge/index.json)
 
 SELECTED_ARTICLE_IDS:
 - 20260120_a1cce2
-- 20260121_63d325
+- 20260121_63d325" 2>&1
+EXIT_CODE=$?
 
-【ユーザーリクエスト】
-Claude Codeで複数のタスクを並列実行する方法を教えて
-EOF
-)"
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+echo "{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task\":\"knowledge-retrieval\",\"model\":\"gemini-2.5-pro\",\"duration_sec\":${DURATION},\"exit_code\":${EXIT_CODE}}" >> .claude/logs/gemini_usage.jsonl
 ```
 
 **出力例**:
 ```
-20260120_a1cce2
-20260121_f9e324
-20260121_1153aa
+SELECTED_ARTICLE_IDS:
+- 20260120_a1cce2
+- 20260121_f9e324
+- 20260121_1153aa
 ```
 
 **記事の読み込み**:
@@ -179,11 +193,12 @@ view_file(AbsolutePath="d:/projects/P010/knowledge/archive/20260121_1153aa.md")
 
 **実行コマンド**:
 ```bash
-gemini -p "$(cat <<'EOF'
-以下のナレッジインデックスを分析し、ユーザーリクエストに関連する記事を最大5件選択してください。
+START_TIME=$(date +%s)
+USER_REQUEST="MCPサーバーの実装方法を知りたい"
 
-【インデックスデータ】
-$(cat knowledge/index.json)
+mkdir -p .claude/logs
+
+cat knowledge/index.json | timeout 120 gemini -m gemini-2.5-pro -p "以下のナレッジインデックスを分析し、「${USER_REQUEST}」に関連する記事を最大5件選択してください。
 
 【分析観点】
 - tags: 現在のトピックとの一致度
@@ -196,19 +211,107 @@ $(cat knowledge/index.json)
 
 SELECTED_ARTICLE_IDS:
 - 20260121_3808a9
-- 20260121_61630a
+- 20260121_61630a" 2>&1
+EXIT_CODE=$?
 
-【ユーザーリクエスト】
-MCPサーバーの実装方法を知りたい
-EOF
-)"
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+echo "{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task\":\"knowledge-retrieval\",\"model\":\"gemini-2.5-pro\",\"duration_sec\":${DURATION},\"exit_code\":${EXIT_CODE}}" >> .claude/logs/gemini_usage.jsonl
 ```
 
 **出力例**:
 ```
-20260121_3808a9
-20260121_61630a
-20260120_c13016
+SELECTED_ARTICLE_IDS:
+- 20260121_3808a9
+- 20260121_61630a
+- 20260120_c13016
 ```
+
+---
+
+## 手動検証手順
+
+このスキルは `.md` ファイルのため、自動テストはありません。以下の手動検証手順で動作を確認してください：
+
+### 検証手順
+
+#### 1. 基本動作確認
+
+短いテストリクエストで動作を確認します：
+
+```bash
+# プロジェクトルートに移動
+cd D:\projects\P010
+
+# .claude/logsディレクトリを作成（存在しない場合）
+mkdir -p .claude/logs
+
+# テスト実行
+START_TIME=$(date +%s)
+USER_REQUEST="Claude Code並列実行"
+
+cat knowledge/index.json | timeout 120 gemini -m gemini-2.5-pro -p "以下のナレッジインデックスを分析し、「${USER_REQUEST}」に関連する記事を最大5件選択してください。
+
+【分析観点】
+- tags: 現在のトピックとの一致度
+- use_cases: 現在の状況との適合性
+- decision_triggers: 類似したトリガーの存在
+- anti_cases: 避けるべき条件の確認
+
+【出力フォーマット】
+以下の形式で、選択した記事のIDのみを出力してください：
+
+SELECTED_ARTICLE_IDS:
+- 20260120_a1cce2
+- 20260121_63d325" 2>&1
+EXIT_CODE=$?
+
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+
+echo "{\"timestamp\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"task\":\"knowledge-retrieval\",\"model\":\"gemini-2.5-pro\",\"duration_sec\":${DURATION},\"exit_code\":${EXIT_CODE}}" >> .claude/logs/gemini_usage.jsonl
+```
+
+#### 2. ログ記録確認
+
+ログファイルに1行追加されたことを確認します：
+
+```bash
+# ログファイルの最後の1行を表示
+tail -n 1 .claude/logs/gemini_usage.jsonl
+
+# 期待される出力形式:
+# {"timestamp":"2026-01-30T...Z","task":"knowledge-retrieval","model":"gemini-2.5-pro","duration_sec":5,"exit_code":0}
+```
+
+#### 3. エラーハンドリング確認（オプション）
+
+タイムアウトや認証エラー時の動作を確認します：
+
+```bash
+# タイムアウトテスト（意図的に短い時間を設定）
+timeout 1 gemini -m gemini-2.5-pro -p "test" 2>&1
+EXIT_CODE=$?
+echo "Exit code: $EXIT_CODE"
+
+# 期待される結果: exit_code が 124 (timeout) または 1 (エラー)
+```
+
+### 確認項目
+
+- [ ] Gemini CLIが正常に実行される
+- [ ] `.claude/logs/gemini_usage.jsonl` に1行追加される
+- [ ] ログにタイムスタンプ、タスク名、モデル名、実行時間、終了コードが含まれる
+- [ ] `exit_code` が 0（成功）または適切なエラーコード
+- [ ] タイムアウト（120秒）が設定されている
+
+### トラブルシューティング
+
+| 問題 | 原因 | 対処法 |
+|------|------|--------|
+| `gemini: command not found` | Gemini CLIが未インストール | `npm install -g @google/generative-ai-cli` でインストール |
+| 認証エラー | 認証が未完了 | `gemini auth login` で認証 |
+| タイムアウト | ネットワーク遅延 | タイムアウト値を延長（`timeout 180`） |
+| ログが記録されない | ディレクトリが存在しない | `mkdir -p .claude/logs` を実行 |
 
 
