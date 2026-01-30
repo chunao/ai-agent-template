@@ -122,6 +122,3 @@ knowledge/
 # Project specific
 # ===================
 # Add project-specific ignores below
-
-# Token usage tracking (local only)
-.token-usage/
