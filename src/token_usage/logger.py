@@ -98,6 +98,14 @@ class TokenUsageLogger:
         if self.current_session_id is None:
             raise RuntimeError("No active session")
 
+        # トークン数の非負バリデーション
+        if input_tokens < 0 or output_tokens < 0:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Negative token count detected: input={input_tokens}, output={output_tokens}. Correcting to 0.")
+            input_tokens = max(0, input_tokens)
+            output_tokens = max(0, output_tokens)
+
         self.cumulative_input += input_tokens
         self.cumulative_output += output_tokens
         self.tool_count += 1
@@ -204,6 +212,15 @@ class TokenUsageLogger:
         }
 
         self._write_event(event)
+
+    def resume_session(self, session_id: str) -> None:
+        """既存のセッションを再開.
+
+        Args:
+            session_id: 再開するセッションID
+        """
+        self.current_session_id = session_id
+        self.current_log_file = self.sessions_dir / f"{session_id}.jsonl"
 
     def end_session(self):
         """セッションを終了."""
