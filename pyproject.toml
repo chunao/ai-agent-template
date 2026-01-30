@@ -1,10 +1,13 @@
 [project]
-name = "my-project"  # TODO: プロジェクト名に変更
+name = "claude-session-manager"
 version = "0.1.0"
-description = "Project created from AI Agent Development Template"
+description = "Claude Code session management dashboard"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
+
+[project.scripts]
+claude-session-manager = "claude_session_manager.main:main"
 
 [dependency-groups]
 dev = [
