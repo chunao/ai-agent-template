@@ -95,7 +95,7 @@ Phase 0 で「テスト不要ファイルのみ」と判定された場合、TDD
 # 環境に応じた日時取得（クロスプラットフォーム対応）
 CONFIRM_DATE=$(date "+%Y-%m-%d %H:%M:%S" 2>/dev/null || powershell -Command "Get-Date -Format 'yyyy-MM-dd HH:mm:ss'")
 
-# 使用モデル情報（TDD REVIEWの推奨モデル: Haiku）
+# 使用モデル情報（TDD REVIEWのデフォルトモデル: Haiku）
 EXECUTOR="Claude Code直接実行"
 MODEL="Haiku"
 
@@ -573,7 +573,7 @@ Agent:
 
 | 項目 | 内容 |
 |------|------|
-| **推奨モデル** | Haiku |
+| **デフォルトモデル** | Haiku |
 | **代替候補** | Sonnet（複雑なビジネスロジックのテスト評価時） |
 | **タスク複雑度** | 低〜中 |
 | **必要コンテキスト** | テストファイル + 対応する実装ファイル |
@@ -585,16 +585,38 @@ Agent:
 - 5ステップの評価観点が構造化されており、機械的に判断可能な部分が多い
 - Codex委任の最有力候補。評価基準が明確かつ定量的で、コンテキストが限定的
 
-### 実行方式方針
+### 実行方式方針（必須手順）
 
-**方針: Codex委任を優先（Issue #45 対応）**
+**方針: Codex委任を原則とする（Issue #92 対応）**
 
-TDD REVIEW は以下の方式で実行する：
+#### Step 1: Codex CLI存在確認
 
-1. **優先**: `codex-delegate` スキルによるCodex CLI委任
-   - レートリミット対策としてClaude Codeのトークン消費を削減
-   - Issue内容をコンテキストとして提供することでテストの意図を理解可能
-2. **フォールバック**: Codex CLI利用不可時はメインエージェント内で従来通り実行
+**原則として、すべてのレビューはCodex CLIに委任すること。**
+
+まず、Codex CLIの存在を確認します：
+
+```bash
+# Windows
+where codex 2>nul && echo "Codex CLI available" || echo "Codex CLI not found"
+```
+
+- **Codex CLI が存在する場合** → Step 2（Codex委任）へ進む
+- **Codex CLI が存在しない場合** → Step 3（Claude Codeフォールバック）へ進む
+
+#### Step 2: Codex委任（原則）
+
+`codex-delegate` スキルによるCodex CLI委任：
+- レートリミット対策としてClaude Codeのトークン消費を削減
+- Issue内容をコンテキストとして提供することでテストの意図を理解可能
+
+#### Step 3: Claude Code（Codex CLI利用不可時のみ）
+
+**Codex CLI利用不可時のみ**メインエージェント内で従来通り実行：
+
+Codex CLI利用不可条件：
+- Codex CLIがインストールされていない
+- `OPENAI_API_KEY` が設定されていない
+- Codex CLI実行がエラーで失敗した
 
 ## Tips
 

@@ -67,11 +67,25 @@
 - {具体的な修正案}
 ```
 
-## Invocation
+## Invocation（必須手順）
 
-このエージェントは以下の方法で呼び出せます：
+このエージェントは以下の手順で呼び出します：
 
-### 方法1: Codex委任（推奨 - レートリミット対策）
+### Step 1: Codex CLI存在確認
+
+**原則として、すべてのレビューはCodex CLIに委任すること。**
+
+まず、Codex CLIの存在を確認します：
+
+```bash
+# Windows
+where codex 2>nul && echo "Codex CLI available" || echo "Codex CLI not found"
+```
+
+- **Codex CLI が存在する場合** → Step 2（Codex委任）へ進む
+- **Codex CLI が存在しない場合** → Step 3（Claude Codeフォールバック）へ進む
+
+### Step 2: Codex委任（原則）
 
 ```
 codex-delegateスキルを使用して、code-reviewを実行してください。
@@ -79,7 +93,16 @@ codex-delegateスキルを使用して、code-reviewを実行してください�
 Issue: #{issue番号}
 ```
 
-### 方法2: Claude Code サブエージェント（フォールバック）
+### Step 3: Claude Code サブエージェント（Codex CLI利用不可時のみ）
+
+**Codex CLI利用不可時のみ**以下の手順で実行：
+
+Codex CLI利用不可条件：
+- Codex CLIがインストールされていない
+- `OPENAI_API_KEY` が設定されていない
+- Codex CLI実行がエラーで失敗した
+
+この場合：
 
 ```
 コードレビューをお願いします。Reviewerエージェントを使用してください。
@@ -89,7 +112,7 @@ Issue: #{issue番号}
 
 | 項目 | 内容 |
 |------|------|
-| **推奨モデル** | Sonnet |
+| **デフォルトモデル** | Sonnet |
 | **代替候補** | Haiku（軽量な差分レビューの場合） |
 | **タスク複雑度** | 中 |
 | **必要コンテキスト** | 変更差分 + 関連ファイル |
@@ -111,7 +134,7 @@ Issue: #{issue番号}
 | **呼び出し元** | Task ツールで `general-purpose` subagent として | `/review` コマンドから直接 |
 | **評価方式** | 4観点を一括評価 | 4観点を段階的に1つずつ評価（Progressive Pattern） |
 | **精度** | 標準 | 高（1観点集中による精度向上） |
-| **推奨シーン** | 簡易チェック、CI内レビュー | PR前の最終レビュー |
+| **適用シーン** | 簡易チェック、CI内レビュー | PR前の最終レビュー |
 
 ## Guidelines
 

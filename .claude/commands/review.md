@@ -2,9 +2,23 @@
 
 段階的にコードレビューを実行します。
 
-## レビュー実行方法
+## レビュー実行フロー（必須手順）
 
-### 方法1: Codex委任（推奨 - レートリミット対策）
+### Step 1: Codex CLI存在確認
+
+**原則として、すべてのレビューはCodex CLIに委任すること。**
+
+まず、Codex CLIの存在を確認します：
+
+```bash
+# Windows
+where codex 2>nul && echo "Codex CLI available" || echo "Codex CLI not found"
+```
+
+- **Codex CLI が存在する場合** → Step 2（Codex委任）へ進む
+- **Codex CLI が存在しない場合** → Step 3（Claude Codeフォールバック）へ進む
+
+### Step 2: Codex委任（原則）
 
 codex-delegateスキルを使用してprogressive-reviewを実行：
 
@@ -14,9 +28,16 @@ codex-delegateスキルを使用して、progressive-reviewを実行してくだ
 Issue: #{ブランチから抽出したIssue番号}
 ```
 
-### 方法2: Claude Code（フォールバック）
+### Step 3: Claude Code（Codex CLI利用不可時のみ）
 
-Codex CLI利用不可時（未インストール / OPENAI_API_KEY未設定 / 実行エラー）は、以下の「レビュー観点」に従って従来通り4観点の段階的レビューを実行してください。
+**Codex CLI利用不可時のみ**以下の手順で実行：
+
+Codex CLI利用不可条件：
+- Codex CLIがインストールされていない
+- `OPENAI_API_KEY` が設定されていない
+- Codex CLI実行がエラーで失敗した
+
+この場合、以下の「レビュー観点」に従って従来通り4観点の段階的レビューを実行してください。
 
 ## レビュー観点
 
@@ -99,7 +120,7 @@ echo "Issue番号: $ISSUE_NUM"
 # 環境に応じた日時取得（クロスプラットフォーム対応）
 REVIEW_DATE=$(date "+%Y-%m-%d %H:%M:%S" 2>/dev/null || powershell -Command "Get-Date -Format 'yyyy-MM-dd HH:mm:ss'")
 
-# 使用モデル情報（review.mdの推奨モデル: Claude Sonnet 4.5）
+# 使用モデル情報（review.mdのデフォルトモデル: Claude Sonnet 4.5）
 EXECUTOR="Claude Code直接実行"
 MODEL="Claude Sonnet 4.5"
 
