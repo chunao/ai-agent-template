@@ -4,10 +4,7 @@ version = "0.1.0"
 description = "Project created from AI Agent Development Template"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = [
-    "pydantic>=2.0",
-    "tiktoken>=0.5.0",
-]
+dependencies = []
 
 [dependency-groups]
 dev = [
