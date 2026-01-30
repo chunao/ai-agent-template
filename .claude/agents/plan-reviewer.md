@@ -84,15 +84,29 @@
 
 ### 判定
 - **80点以上**: ✅ 実装開始OK
-- **60-79点**: ⚠️ 修正後に再レビュー推奨
+- **60-79点**: ⚠️ 修正後に再レビューを提案
 - **60点未満**: ❌ 計画の見直しが必要
 ```
 
-## Invocation
+## Invocation（必須手順）
 
-このエージェントは以下の方法で呼び出せます：
+このエージェントは以下の手順で呼び出します：
 
-### 方法1: Codex委任（推奨 - レートリミット対策）
+### Step 1: Codex CLI存在確認
+
+**原則として、すべてのレビューはCodex CLIに委任すること。**
+
+まず、Codex CLIの存在を確認します：
+
+```bash
+# Windows
+where codex 2>nul && echo "Codex CLI available" || echo "Codex CLI not found"
+```
+
+- **Codex CLI が存在する場合** → Step 2（Codex委任）へ進む
+- **Codex CLI が存在しない場合** → Step 3（Claude Codeフォールバック）へ進む
+
+### Step 2: Codex委任（原則）
 
 ```
 codex-delegateスキルを使用して、plan-reviewを実行してください。
@@ -100,7 +114,16 @@ codex-delegateスキルを使用して、plan-reviewを実行してください�
 Issue: #{issue番号}
 ```
 
-### 方法2: Claude Code サブエージェント（フォールバック）
+### Step 3: Claude Code サブエージェント（Codex CLI利用不可時のみ）
+
+**Codex CLI利用不可時のみ**以下の手順で実行：
+
+Codex CLI利用不可条件：
+- Codex CLIがインストールされていない
+- `OPENAI_API_KEY` が設定されていない
+- Codex CLI実行がエラーで失敗した
+
+この場合：
 
 ```
 実装計画をレビューしてください。plan-reviewerエージェントを使用してください。
@@ -117,7 +140,7 @@ prompt: ".claude/agents/plan-reviewer.md の手順に従って、以下の実装
 
 | 項目 | 内容 |
 |------|------|
-| **推奨モデル** | Sonnet |
+| **デフォルトモデル** | Sonnet |
 | **代替候補** | Opus（高品質が必要な場合） |
 | **タスク複雑度** | 中〜高 |
 | **必要コンテキスト** | プロジェクト全体のアーキテクチャ理解 |

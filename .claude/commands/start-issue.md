@@ -148,9 +148,23 @@ Issueの内容を分析し、未確定・曖昧な部分がないか確認して
 
 実装計画を投稿したら、**実装を開始する前に**必ずレビューを行ってください。
 
-#### 計画レビューの実行
+#### 計画レビューの実行（必須手順）
 
-##### 方法1: Codex委任（推奨 - レートリミット対策）
+##### Step 1: Codex CLI存在確認
+
+**原則として、すべてのレビューはCodex CLIに委任すること。**
+
+まず、Codex CLIの存在を確認します：
+
+```bash
+# Windows
+where codex 2>nul && echo "Codex CLI available" || echo "Codex CLI not found"
+```
+
+- **Codex CLI が存在する場合** → Step 2（Codex委任）へ進む
+- **Codex CLI が存在しない場合** → Step 3（Claude Codeフォールバック）へ進む
+
+##### Step 2: Codex委任（原則）
 
 codex-delegateスキルを使用してplan-reviewを実行：
 
@@ -160,9 +174,16 @@ codex-delegateスキルを使用して、plan-reviewを実行してください�
 Issue: #$ARGUMENTS
 ```
 
-##### 方法2: Claude Code サブエージェント（フォールバック）
+##### Step 3: Claude Code サブエージェント（Codex CLI利用不可時のみ）
 
-Codex CLI利用不可時：
+**Codex CLI利用不可時のみ**以下の手順で実行：
+
+Codex CLI利用不可条件：
+- Codex CLIがインストールされていない
+- `OPENAI_API_KEY` が設定されていない
+- Codex CLI実行がエラーで失敗した
+
+この場合：
 
 ```
 subagent_type: "general-purpose"
