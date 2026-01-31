@@ -1,8 +1,12 @@
 """セッションマネージャーモジュール"""
 
-from typing import Optional
+from typing import Optional, Union
 
 from .session import PowerShellSession
+from .interactive_session import (
+    InteractivePowerShellSession,
+    PYWINPTY_AVAILABLE,
+)
 
 
 class SessionManager:
@@ -14,23 +18,27 @@ class SessionManager:
             max_sessions: 最大セッション数
         """
         self.max_sessions = max_sessions
-        self.sessions: dict[str, PowerShellSession] = {}
+        self.sessions: dict[
+            str, Union[PowerShellSession, InteractivePowerShellSession]
+        ] = {}
 
     def create_session(
-        self, session_id: str, working_dir: str
-    ) -> PowerShellSession:
+        self, session_id: str, working_dir: str, interactive: bool = False
+    ) -> Union[PowerShellSession, InteractivePowerShellSession]:
         """
         新規セッションを作成する
 
         Args:
             session_id: セッション識別子
             working_dir: 作業ディレクトリパス
+            interactive: インタラクティブモードを使用するか（デフォルト: False）
 
         Returns:
-            作成されたPowerShellSession
+            作成されたセッション（PowerShellSession または InteractivePowerShellSession）
 
         Raises:
-            RuntimeError: 最大セッション数を超える場合
+            RuntimeError: 最大セッション数を超える場合、
+                         またはインタラクティブモードが利用不可の場合
             ValueError: 重複したセッションIDの場合
         """
         if len(self.sessions) >= self.max_sessions:
@@ -41,11 +49,23 @@ class SessionManager:
         if session_id in self.sessions:
             raise ValueError(f"Session ID already exists: {session_id}")
 
-        session = PowerShellSession(session_id, working_dir)
+        # インタラクティブモード判定
+        if interactive:
+            if not PYWINPTY_AVAILABLE:
+                raise RuntimeError(
+                    "Interactive mode is not available. "
+                    "pywinpty is required (Windows only)."
+                )
+            session = InteractivePowerShellSession(session_id, working_dir)
+        else:
+            session = PowerShellSession(session_id, working_dir)
+
         self.sessions[session_id] = session
         return session
 
-    def get_session(self, session_id: str) -> Optional[PowerShellSession]:
+    def get_session(
+        self, session_id: str
+    ) -> Optional[Union[PowerShellSession, InteractivePowerShellSession]]:
         """
         セッションを取得する
 
@@ -53,7 +73,8 @@ class SessionManager:
             session_id: セッション識別子
 
         Returns:
-            PowerShellSession、存在しない場合はNone
+            PowerShellSession または InteractivePowerShellSession、
+            存在しない場合はNone
         """
         return self.sessions.get(session_id)
 
