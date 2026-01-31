@@ -1,5 +1,6 @@
 """SessionManagerクラスのテスト"""
 
+import platform
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -157,3 +158,65 @@ class TestSessionManager:
 
         assert len(manager.sessions) == 0
         assert manager.list_sessions() == []
+
+    @patch("claude_session_manager.core.manager.PowerShellSession")
+    def test_create_session_non_interactive_default(self, mock_session_class):
+        """interactive未指定時は非インタラクティブセッションが作成される"""
+        from claude_session_manager.core.manager import SessionManager
+
+        mock_session = MagicMock()
+        mock_session_class.return_value = mock_session
+
+        manager = SessionManager(max_sessions=4)
+        session = manager.create_session("session-1", ".")
+
+        # PowerShellSessionが呼ばれていることを確認
+        mock_session_class.assert_called_once_with("session-1", ".")
+        assert session == mock_session
+
+    @pytest.mark.skipif(
+        platform.system() != "Windows",
+        reason="InteractivePowerShellSession is Windows-only",
+    )
+    @patch("claude_session_manager.core.manager.InteractivePowerShellSession")
+    @patch("claude_session_manager.core.manager.PYWINPTY_AVAILABLE", True)
+    def test_create_session_interactive_true(self, mock_interactive_class):
+        """interactive=Trueでインタラクティブセッションが作成される"""
+        from claude_session_manager.core.manager import SessionManager
+
+        mock_session = MagicMock()
+        mock_interactive_class.return_value = mock_session
+
+        manager = SessionManager(max_sessions=4)
+        session = manager.create_session("session-1", ".", interactive=True)
+
+        # InteractivePowerShellSessionが呼ばれていることを確認
+        mock_interactive_class.assert_called_once_with("session-1", ".")
+        assert session == mock_session
+
+    @patch("claude_session_manager.core.manager.PowerShellSession")
+    def test_create_session_interactive_false_explicit(self, mock_session_class):
+        """interactive=Falseで明示的に非インタラクティブセッションが作成される"""
+        from claude_session_manager.core.manager import SessionManager
+
+        mock_session = MagicMock()
+        mock_session_class.return_value = mock_session
+
+        manager = SessionManager(max_sessions=4)
+        session = manager.create_session("session-1", ".", interactive=False)
+
+        # PowerShellSessionが呼ばれていることを確認
+        mock_session_class.assert_called_once_with("session-1", ".")
+        assert session == mock_session
+
+    @patch("claude_session_manager.core.manager.PYWINPTY_AVAILABLE", False)
+    def test_create_session_interactive_unavailable(self):
+        """pywinpty利用不可時にinteractive=Trueでエラー"""
+        from claude_session_manager.core.manager import SessionManager
+
+        manager = SessionManager(max_sessions=4)
+
+        with pytest.raises(
+            RuntimeError, match="Interactive mode is not available"
+        ):
+            manager.create_session("session-1", ".", interactive=True)
