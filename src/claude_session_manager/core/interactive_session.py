@@ -10,7 +10,7 @@ from typing import Optional
 # Windows環境でのみpywinptyをインポート
 if platform.system() == "Windows":
     try:
-        from pywinpty import PtyProcess
+        from winpty import PtyProcess
 
         PYWINPTY_AVAILABLE = True
     except ImportError:
